@@ -1,88 +1,43 @@
 "use client";
 
 import React from "react";
-import { SkillPathResponse } from "@/lib/types";
+import type { SkillPathResponse, ModuleItem, LessonItem } from "../types";
 
 interface CurriculumViewProps {
-  path: SkillPathResponse;
-  onSelectLesson: (lessonTitle: string, moduleTitle: string) => void;
+  pathData?: SkillPathResponse;
+  modules: ModuleItem[];
+  onSelectLesson?: (lesson: LessonItem) => void;
 }
 
-export function CurriculumView({ path, onSelectLesson }: CurriculumViewProps) {
+export default function CurriculumView({ pathData, modules, onSelectLesson }: CurriculumViewProps) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-      <header
-        style={{
-          backgroundColor: "#ffffff",
-          padding: "24px",
-          borderRadius: "8px",
-          border: "1px solid #e2e8f0",
-        }}
-      >
-        <span
-          style={{
-            fontSize: "0.85rem",
-            fontWeight: 600,
-            color: "#2563eb",
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-          }}
-        >
-          {path.difficulty || "Beginner"} Level
-        </span>
-        <h2 style={{ fontSize: "1.75rem", margin: "8px 0 0 0", color: "#0f172a" }}>
-          {path.topic}
-        </h2>
-      </header>
+    <div className="space-y-4 text-black">
+      {pathData && (
+        <div className="bg-gray-100 p-4 rounded mb-4">
+          <h2 className="text-xl font-bold">{pathData.title}</h2>
+          {pathData.topic && <p className="text-sm text-gray-700">Topic: {pathData.topic}</p>}
+          {pathData.difficulty && <p className="text-sm text-gray-700">Difficulty: {pathData.difficulty}</p>}
+        </div>
+      )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        {path.modules?.map((module, modIndex) => (
-          <section
-            key={module.id || modIndex}
-            style={{
-              backgroundColor: "#ffffff",
-              padding: "20px",
-              borderRadius: "8px",
-              border: "1px solid #e2e8f0",
-            }}
-          >
-            <h3 style={{ margin: "0 0 6px 0", color: "#1e293b", fontSize: "1.2rem" }}>
-              Module {modIndex + 1}: {module.title}
-            </h3>
-            <p style={{ margin: "0 0 16px 0", color: "#64748b", fontSize: "0.95rem" }}>
-              {module.description}
-            </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {module.lessons?.map((lesson) => (
-                <button
-                  key={lesson.id}
-                  onClick={() => onSelectLesson(lesson.title, module.title)}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "12px 16px",
-                    backgroundColor: "#f8fafc",
-                    border: "1px solid #cbd5e1",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    transition: "border-color 0.15s ease",
-                  }}
-                >
-                  <span style={{ fontWeight: 500, color: "#334155" }}>
-                    {lesson.title}
-                  </span>
-                  <span style={{ fontSize: "0.85rem", color: "#64748b" }}>
-                    {lesson.duration}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
+      {modules.map((module: ModuleItem, modIndex: number) => (
+        <div key={module.id || modIndex} className="border p-4 rounded bg-white shadow-sm">
+          <h3 className="text-lg font-bold">{module.title}</h3>
+          <p className="text-sm text-gray-600 mb-3">{module.description}</p>
+          <div className="space-y-2">
+            {module.lessons.map((lesson: LessonItem, lesIndex: number) => (
+              <div
+                key={lesson.id || lesson.lesson_id || lesIndex}
+                onClick={() => onSelectLesson?.(lesson)}
+                className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded cursor-pointer border"
+              >
+                <span className="font-medium text-sm">{lesson.title}</span>
+                <span className="text-xs bg-gray-200 px-2 py-1 rounded">{lesson.duration}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

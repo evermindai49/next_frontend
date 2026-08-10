@@ -1,10 +1,12 @@
 export interface LessonItem {
+  id?: string;
   lesson_id: string;
   title: string;
   duration: string;
 }
 
 export interface ModuleItem {
+  id?: string;
   title: string;
   description: string;
   lessons: LessonItem[];
@@ -13,6 +15,8 @@ export interface ModuleItem {
 export interface SkillPathResponse {
   title: string;
   description: string;
+  topic?: string;
+  difficulty?: string;
   modules: ModuleItem[];
 }
 
@@ -27,7 +31,9 @@ export interface ExerciseResponse {
   instructions: string;
   initial_code: string;
   hints: string[];
-  options?: string[]; // Fixed TS2339: Added optional options property
+  options?: string[];
+  question?: string;
+  solution?: string;
 }
 
 export interface FeedbackResponse {
