@@ -3,7 +3,7 @@ import {
   LessonContentResponse,
   ExerciseResponse,
   FeedbackResponse,
-} from "@/types";
+} from "./types";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://my-fastapi-backend-iota.vercel.app";
@@ -25,7 +25,7 @@ async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise
   return response.json();
 }
 
-// Named Exports
+// --- Direct Named Exports ---
 export async function generateSkillPath(
   topic: string,
   difficulty = "Beginner",
@@ -48,16 +48,11 @@ export async function generateLessonContent(
   });
 }
 
-// lib/api.ts or api.ts
-
-export async function generateExercise(topic: string) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/generate-exercise`, {
+export async function generateExercise(topic: string): Promise<ExerciseResponse> {
+  return fetchAPI<ExerciseResponse>("/api/v1/generate-exercise", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ topic }),
   });
-  if (!response.ok) throw new Error("Failed to generate exercise");
-  return response.json();
 }
 
 export async function submitAnswer(
@@ -70,7 +65,7 @@ export async function submitAnswer(
   });
 }
 
-// Grouped Default Export
+// --- Object Group Export ---
 export const ApiService = {
   generateSkillPath,
   generateLessonContent,
