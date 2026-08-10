@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { generateSkillPath, generateLessonContent, generateExercise } from "@/api";
-import { SkillPathResponse, LessonContentResponse, ExerciseResponse } from "@/types";
+import { generateSkillPath, generateLessonContent, generateExercise } from "@/lib/api";
+import { SkillPathResponse, LessonContentResponse, ExerciseResponse } from "@/lib/types";
 
 export default function HomePage() {
   const [topic, setTopic] = useState("");

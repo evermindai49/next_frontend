@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getUsersList, getAdminAnalytics, deleteUser } from "@/api";
-import { User, AdminAnalytics } from "@/types";
+import { getUsersList, getAdminAnalytics, deleteUser } from "@/lib/api";
+import { User, AdminAnalytics } from "@/lib/types";
 
 export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
