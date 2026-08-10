@@ -3,7 +3,6 @@ import {
   LessonContentResponse,
   ExerciseResponse,
   FeedbackResponse,
-  AuthResponse,
 } from "@/types";
 
 const API_BASE_URL =
@@ -26,7 +25,7 @@ async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise
   return response.json();
 }
 
-// Named export functions
+// Named Exports
 export async function generateSkillPath(
   topic: string,
   difficulty = "Beginner",
@@ -66,7 +65,7 @@ export async function submitAnswer(
   });
 }
 
-// Grouped object export
+// Grouped Default Export
 export const ApiService = {
   generateSkillPath,
   generateLessonContent,
