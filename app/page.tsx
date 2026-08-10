@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { generateSkillPath, generateExercise } from "@/api";
-import type { SkillPathResponse, ExerciseResponse, ModuleItem, LessonItem } from "@/types";
+import { generateSkillPath, generateExercise } from "../api";
+import type { SkillPathResponse, ExerciseResponse, ModuleItem, LessonItem } from "../types";
 
 export default function Home() {
   const [pathData, setPathData] = useState<SkillPathResponse | null>(null);
