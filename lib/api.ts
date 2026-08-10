@@ -48,11 +48,16 @@ export async function generateLessonContent(
   });
 }
 
-export async function generateExercise(topic: string): Promise<ExerciseResponse> {
-  return fetchAPI<ExerciseResponse>("/api/v1/generate-exercise", {
+// lib/api.ts or api.ts
+
+export async function generateExercise(topic: string) {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/generate-exercise`, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ topic }),
   });
+  if (!response.ok) throw new Error("Failed to generate exercise");
+  return response.json();
 }
 
 export async function submitAnswer(

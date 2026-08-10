@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getUsersList, getAdminAnalytics, deleteUser } from "@/lib/api";
+import { generateExercise, getUsersList, getAdminAnalytics, deleteUser } from "@/lib/api";
 import { User, AdminAnalytics } from "@/lib/types";
 
 export default function AdminPage() {
