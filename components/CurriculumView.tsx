@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { SkillPathResponse } from "@/types";
+import { SkillPathResponse } from "@/lib/types";
 
 interface CurriculumViewProps {
   path: SkillPathResponse;

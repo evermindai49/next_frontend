@@ -154,9 +154,11 @@ export default function HomePage() {
               <h4 style={{ margin: "0 0 8px 0", color: "#166534" }}>Knowledge Check</h4>
               <p style={{ fontWeight: 600, margin: "0 0 12px 0" }}>{activeExercise.question}</p>
               <ul>
-                {activeExercise.options?.map((opt, i) => (
-                  <li key={i}>{opt}</li>
-                ))}
+                {exercise.options?.map((opt: string, i: number) => ( // Fixed TS2339 & TS7006
+                <div key={i} className="p-2 border rounded">
+                  {opt}
+                </div>
+              ))}
               </ul>
             </div>
           )}

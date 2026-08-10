@@ -27,6 +27,7 @@ export interface ExerciseResponse {
   instructions: string;
   initial_code: string;
   hints: string[];
+  options?: string[]; // Fixed TS2339: Added optional options property
 }
 
 export interface FeedbackResponse {
