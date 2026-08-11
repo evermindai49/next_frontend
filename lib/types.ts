@@ -1,14 +1,14 @@
 // lib/types.ts
 
+// lib/types.ts
+
 export interface LessonItem {
-  id?: string;
-  lesson_id?: string;
+  lesson_id: string;
   title: string;
   duration?: string;
 }
 
 export interface ModuleItem {
-  id?: string;
   title: string;
   description: string;
   lessons: LessonItem[];
@@ -17,11 +17,10 @@ export interface ModuleItem {
 export interface SkillPathResponse {
   title: string;
   description: string;
-  // Account for varying key names returned by FastAPI/Pydantic schemas
   topic?: string;
-  course_name?: string;
+  course_name?: string;  // FastAPI alternative key
   difficulty?: string;
-  level?: string;
+  level?: string;        // FastAPI alternative key
   modules: ModuleItem[];
 }
 

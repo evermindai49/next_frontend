@@ -10,16 +10,17 @@ export default function Home() {
 
   // app/page.tsx
 
+  // app/page.tsx
+
   const handleFetchPath = async () => {
     try {
       const data = await generateSkillPath("FastAPI");
 
-      // Extract values safely with fallbacks
-      const title = data.title;
-      const topic = data.topic || data.course_name || "FastAPI";
+      // Extract property values with fallback checks
+      const topic = data.topic || data.course_name || "N/A";
       const difficulty = data.difficulty || data.level || "Beginner";
 
-      console.log(`Loaded Path: ${title} | Topic: ${topic} | Level: ${difficulty}`);
+      console.log(`Title: ${data.title} | Topic: ${topic} | Difficulty: ${difficulty}`);
 
       setPathData(data);
     } catch (err: any) {
