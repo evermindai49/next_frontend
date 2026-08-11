@@ -8,19 +8,23 @@ export default function Home() {
   const [pathData, setPathData] = useState<SkillPathResponse | null>(null);
   const [exerciseData, setExerciseData] = useState<ExerciseResponse | null>(null);
 
+  // app/page.tsx
+
   const handleFetchPath = async () => {
-    const data = await generateSkillPath("FastAPI");
-    setPathData(data);
+    try {
+      const data = await generateSkillPath("FastAPI");
 
-    // Safely accessing properties using updated SkillPathResponse schema
-    console.log(data.title, data.topic, data.difficulty);
+      // Extract values safely with fallbacks
+      const title = data.title;
+      const topic = data.topic || data.course_name || "FastAPI";
+      const difficulty = data.difficulty || data.level || "Beginner";
 
-    data.modules.forEach((mod: ModuleItem, modIdx: number) => {
-      const moduleId = mod.id || `mod-${modIdx}`;
-      mod.lessons.forEach((les: LessonItem, lesIdx: number) => {
-        const lessonId = les.id || les.lesson_id || `les-${lesIdx}`;
-      });
-    });
+      console.log(`Loaded Path: ${title} | Topic: ${topic} | Level: ${difficulty}`);
+
+      setPathData(data);
+    } catch (err: any) {
+      console.error("Fetch failed:", err);
+    }
   };
 
   return (

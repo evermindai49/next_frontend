@@ -1,8 +1,10 @@
+// lib/types.ts
+
 export interface LessonItem {
   id?: string;
-  lesson_id: string;
+  lesson_id?: string;
   title: string;
-  duration: string;
+  duration?: string;
 }
 
 export interface ModuleItem {
@@ -15,8 +17,11 @@ export interface ModuleItem {
 export interface SkillPathResponse {
   title: string;
   description: string;
+  // Account for varying key names returned by FastAPI/Pydantic schemas
   topic?: string;
+  course_name?: string;
   difficulty?: string;
+  level?: string;
   modules: ModuleItem[];
 }
 
