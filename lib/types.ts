@@ -2,13 +2,17 @@
 
 // lib/types.ts
 
+// lib/types.ts
+
 export interface LessonItem {
+  id?: string;
   lesson_id: string;
   title: string;
-  duration?: string;
+  duration: string;
 }
 
 export interface ModuleItem {
+  id?: string;
   title: string;
   description: string;
   lessons: LessonItem[];
