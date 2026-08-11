@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { LessonContentResponse } from "@/lib/types";
+import { LessonContentResponse } from "../types";
 
 interface LessonModalProps {
   lesson: LessonContentResponse;

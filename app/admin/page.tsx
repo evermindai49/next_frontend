@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 // Import named function and type directly matching root structure
-import { generateExercise, submitAnswer } from "@/lib/api";
-import type { ExerciseResponse, FeedbackResponse } from "@/lib/types";
+import { generateExercise, submitAnswer } from "../../api";
+import type { ExerciseResponse, FeedbackResponse } from "../../types";
 
 export default function AdminPage() {
   const [topic, setTopic] = useState("");
