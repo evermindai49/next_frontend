@@ -12,12 +12,23 @@ export default function Home() {
 
   // app/page.tsx
 
-  const handleFetchPath = async () => {
-    try {
-      const data = await generateSkillPath("FastAPI");
+  // app/page.tsx
 
-      // Extract property values with fallback checks
-      const topic = data.topic || data.course_name || "N/A";
+  const handleFetchPath = async () => {
+    const requestedTopic = "FastAPI";
+
+    try {
+      const data = await generateSkillPath(requestedTopic);
+
+      // Check backend payload keys, or fall back to the requested topic variable
+      const topic = 
+        data.topic || 
+        data.subject || 
+        data.category || 
+        data.technology || 
+        data.course_name || 
+        requestedTopic;
+
       const difficulty = data.difficulty || data.level || "Beginner";
 
       console.log(`Title: ${data.title} | Topic: ${topic} | Difficulty: ${difficulty}`);

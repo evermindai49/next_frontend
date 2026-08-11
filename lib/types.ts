@@ -18,13 +18,18 @@ export interface ModuleItem {
   lessons: LessonItem[];
 }
 
+// lib/types.ts
+
 export interface SkillPathResponse {
   title: string;
   description: string;
   topic?: string;
-  course_name?: string;  // FastAPI alternative key
+  subject?: string;
+  category?: string;
+  technology?: string;
+  course_name?: string;
   difficulty?: string;
-  level?: string;        // FastAPI alternative key
+  level?: string;
   modules: ModuleItem[];
 }
 
