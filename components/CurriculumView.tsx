@@ -1,5 +1,3 @@
-// components/CurriculumView.tsx
-
 "use client";
 
 import React from "react";
@@ -12,29 +10,39 @@ interface CurriculumViewProps {
 }
 
 export default function CurriculumView({ pathData, modules, onSelectLesson }: CurriculumViewProps) {
+  if (!modules || modules.length === 0) {
+    return (
+      <div className="p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded">
+        No modules found in this learning path.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 text-black">
       {pathData && (
-        <div className="bg-gray-100 p-4 rounded mb-4">
+        <div className="bg-gray-100 p-4 rounded border">
           <h2 className="text-xl font-bold">{pathData.title}</h2>
-          {pathData.topic && <p className="text-sm text-gray-700">Topic: {pathData.topic}</p>}
-          {pathData.difficulty && <p className="text-sm text-gray-700">Difficulty: {pathData.difficulty}</p>}
+          <p className="text-sm text-gray-600">{pathData.description}</p>
         </div>
       )}
 
       {modules.map((module: ModuleItem, modIndex: number) => (
-        <div key={module.id || modIndex} className="border p-4 rounded bg-white shadow-sm">
+        <div key={module.id || modIndex} className="border p-4 rounded bg-white shadow-sm space-y-2">
           <h3 className="text-lg font-bold">{module.title}</h3>
           <p className="text-sm text-gray-600 mb-3">{module.description}</p>
+
           <div className="space-y-2">
-            {module.lessons.map((lesson: LessonItem, lesIndex: number) => (
+            {module.lessons?.map((lesson: LessonItem, lesIndex: number) => (
               <div
                 key={lesson.id || lesson.lesson_id || lesIndex}
                 onClick={() => onSelectLesson?.(lesson)}
                 className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded cursor-pointer border"
               >
                 <span className="font-medium text-sm">{lesson.title}</span>
-                <span className="text-xs bg-gray-200 px-2 py-1 rounded">{lesson.duration}</span>
+                <span className="text-xs bg-gray-200 px-2 py-1 rounded">
+                  {lesson.duration || "10 mins"}
+                </span>
               </div>
             ))}
           </div>
