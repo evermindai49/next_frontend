@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import type { SkillPathResponse, ModuleItem, LessonItem } from "../types";
+import type { SkillPathResponse, ModuleItem, LessonItem } from "@/lib/types";
 
 interface CurriculumViewProps {
   pathData?: SkillPathResponse;

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import type { ExerciseResponse } from "../types";
+import type { ExerciseResponse } from "@/lib/types";
 
 interface ExerciseModalProps {
   exercise: ExerciseResponse | null;
