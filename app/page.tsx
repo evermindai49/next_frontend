@@ -1,63 +1,68 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { generateSkillPath } from "@/lib/api";
-import type { SkillPathResponse, Lesson } from "@/lib/types";
-import CurriculumView from "@/components/CurriculumView";
+import React, { useState } from "react";
+import { Navbar } from "@/components/Navbar";
+import { AmbientBackground } from "@/components/AmbientBackground";
+import { CurriculumView } from "@/components/CurriculumView";
 import ExerciseModal from "@/components/ExerciseModal";
+import type { SkillPathResponse, Lesson } from "@/lib/types";
+import { generateSkillPath } from "@/lib/api";
+import {
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
+  Zap,
+  BookOpen,
+  Loader2,
+  AlertCircle,
+  RotateCcw,
+} from "lucide-react";
 
-const NAV_LINKS = [
-  { name: "Home", href: "#" },
-  { name: "About", href: "#about" },
-  { name: "Services", href: "#services" },
-  { name: "Contact", href: "#contact" },
-];
-
-const POPULAR_TOPICS = [
-  { name: "FastAPI", icon: "⚡" },
-  { name: "Python", icon: "🐍" },
-  { name: "Docker", icon: "🐳" },
-  { name: "Next.js", icon: "⚛️" },
-  { name: "PostgreSQL", icon: "🐘" },
-  { name: "Machine Learning", icon: "🤖" },
+const SUGGESTED_TOPICS = [
+  { name: "LLM Architecture", icon: "🤖" },
+  { name: "Quantization & ONNX", icon: "⚡" },
+  { name: "FastAPI Production", icon: "🚀" },
+  { name: "Distributed Training", icon: "🌐" },
 ];
 
 export default function Home() {
-  const [topicInput, setTopicInput] = useState("FastAPI");
-  const [pathData, setPathData] = useState<SkillPathResponse | null>(null);
+  const [topicInput, setTopicInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [skillPath, setSkillPath] = useState<SkillPathResponse | null>(null);
 
-  // Modal State
+  // Modal State Management
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchPathForTopic = async (topicToFetch: string) => {
+  const executeGeneration = async (topicToFetch: string) => {
     if (!topicToFetch.trim()) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      const data = await generateSkillPath(topicToFetch.trim());
-      setPathData(data);
-    } catch (err: any) {
-      console.error("Fetch failed:", err);
-      setError(err.message || "Failed to load curriculum for this topic.");
+      const data = await generateSkillPath(topicToFetch.trim(), "Intermediate");
+      setSkillPath(data);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to generate skill path. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleGenerate = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchPathForTopic(topicInput);
+    executeGeneration(topicInput);
   };
 
   const handleSelectPill = (topic: string) => {
     setTopicInput(topic);
-    fetchPathForTopic(topic);
+    executeGeneration(topic);
   };
 
   const handleSelectLesson = (lesson: Lesson) => {
@@ -70,225 +75,132 @@ export default function Home() {
     setSelectedLesson(null);
   };
 
-  const totalLessons =
-    pathData?.modules?.reduce(
-      (acc, mod) => acc + (mod.lessons?.length || 0),
-      0
-    ) || 0;
-
   return (
-    <div className="flex min-h-screen flex-col bg-slate-950 text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
-      {/* Background Glows */}
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-indigo-600/15 blur-[120px]" />
-        <div className="absolute top-1/3 -right-40 h-[500px] w-[500px] rounded-full bg-blue-600/15 blur-[120px]" />
-      </div>
+    <div className="min-h-screen bg-[#0b1120] text-slate-100 relative overflow-hidden flex flex-col selection:bg-indigo-500 selection:text-white">
+      <AmbientBackground />
+      <Navbar />
 
-      {/* NAVBAR */}
-      <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-indigo-500 to-blue-600 font-bold text-white shadow-md shadow-indigo-500/20">
-              E
+      <main className="flex-1 relative z-10 flex flex-col items-center justify-center px-4 py-12 max-w-6xl mx-auto w-full sm:px-6">
+        {!skillPath ? (
+          /* Hero & Input State */
+          <div className="w-full max-w-2xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold mb-8 backdrop-blur-md">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Next-Gen AI Learning Workspaces</span>
             </div>
-            <span className="text-lg font-bold tracking-tight text-white">
-              EduTech<span className="text-indigo-400">AI</span>
-            </span>
-          </Link>
 
-          <nav className="hidden items-center gap-6 text-sm font-medium text-slate-300 md:flex">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="transition-colors hover:text-indigo-400"
-              >
-                {link.name}
-              </a>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-semibold text-slate-200 transition-all hover:border-indigo-500/50 hover:bg-slate-800 hover:text-white active:scale-95"
-            >
-              <svg
-                className="h-4 w-4 text-indigo-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-              <span>Account</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* MAIN CONTENT */}
-      <main className="flex-1">
-        <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8 space-y-10">
-          <header className="text-center space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-xs font-semibold tracking-wide uppercase text-indigo-300 shadow-sm">
-              <span>✨ AI Curriculum Generator</span>
-            </div>
-            <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent">
-              EduTech Learning Hub
-            </h1>
-            <p className="mx-auto max-w-2xl text-base sm:text-lg text-slate-400">
-              Design personalized, interactive skill paths powered by intelligent
-              AI course compilation.
-            </p>
-          </header>
-
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
-            <form onSubmit={handleFormSubmit} className="flex flex-col gap-4 sm:flex-row sm:items-end">
-              <div className="flex-1 space-y-2">
-                <label htmlFor="topic" className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Target Topic or Discipline
-                </label>
-                <input
-                  id="topic"
-                  type="text"
-                  value={topicInput}
-                  onChange={(e) => setTopicInput(e.target.value)}
-                  placeholder="Search topics (e.g., Quantum Computing, FastAPI, System Design)..."
-                  className="w-full rounded-xl border border-slate-700/80 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 shadow-inner transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
-                  disabled={loading}
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading || !topicInput.trim()}
-                className="flex h-[46px] w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-600 px-7 text-sm font-medium text-white shadow-lg shadow-indigo-500/20 transition-all hover:from-indigo-600 hover:to-blue-700 active:scale-[0.98] disabled:opacity-50"
-              >
-                {loading ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    <span>Compiling Path...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Generate Path</span>
-                    <span className="text-base">→</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="flex flex-wrap items-center gap-2 border-t border-slate-800/80 pt-4 text-xs">
-              <span className="font-medium text-slate-400 mr-1">Suggested:</span>
-              {POPULAR_TOPICS.map((item) => {
-                const isActive = topicInput.toLowerCase() === item.name.toLowerCase();
-                return (
-                  <button
-                    key={item.name}
-                    type="button"
-                    onClick={() => handleSelectPill(item.name)}
-                    disabled={loading}
-                    className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-medium transition-all ${
-                      isActive
-                        ? "border-indigo-500 bg-indigo-600/20 text-indigo-200 shadow-sm shadow-indigo-500/20"
-                        : "border-slate-800 bg-slate-950/40 text-slate-400 hover:border-slate-700 hover:bg-slate-800 hover:text-slate-200"
-                    }`}
-                  >
-                    <span>{item.icon}</span>
-                    <span>{item.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          {error && (
-            <div className="flex items-center gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-300 backdrop-blur-md">
-              <span className="text-xl">⚠️</span>
-              <p className="text-sm font-medium">{error}</p>
-            </div>
-          )}
-
-          {loading && (
-            <div className="space-y-4 animate-pulse">
-              <div className="h-24 rounded-2xl border border-slate-800 bg-slate-900/40" />
-              <div className="h-44 rounded-2xl border border-slate-800 bg-slate-900/40" />
-              <div className="h-44 rounded-2xl border border-slate-800 bg-slate-900/40" />
-            </div>
-          )}
-
-          {!loading && pathData && (
-            <section className="space-y-6">
-              <div className="grid grid-cols-2 gap-4 rounded-xl border border-slate-800 bg-slate-900/40 p-4 text-center backdrop-blur-sm sm:grid-cols-3">
-                <div className="flex flex-col items-center justify-center p-2">
-                  <span className="text-xs text-slate-400">Total Modules</span>
-                  <span className="mt-1 text-lg font-bold text-indigo-300">
-                    {pathData.modules?.length || 0} Modules
-                  </span>
-                </div>
-                <div className="flex flex-col items-center justify-center p-2">
-                  <span className="text-xs text-slate-400">Lesson Count</span>
-                  <span className="mt-1 text-lg font-bold text-indigo-300">
-                    {totalLessons} Lessons
-                  </span>
-                </div>
-                <div className="col-span-2 flex flex-col items-center justify-center p-2 sm:col-span-1">
-                  <span className="text-xs text-slate-400">Difficulty Level</span>
-                  <span className="mt-1 text-lg font-bold text-emerald-400">
-                    {pathData.difficulty || "Beginner"}
-                  </span>
-                </div>
-              </div>
-
-              <CurriculumView
-                pathData={pathData}
-                modules={pathData.modules || []}
-                onSelectLesson={handleSelectLesson}
+            <div className="relative w-full">
+              {/* Outer Glow Effect */}
+              <div
+                aria-hidden="true"
+                className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 opacity-30 blur-2xl transition duration-1000 animate-pulse"
               />
-            </section>
-          )}
-        </div>
+
+              {/* Main Form Container */}
+              <div className="relative w-full rounded-2xl bg-[#172033]/90 border border-slate-700/70 p-8 sm:p-10 shadow-2xl backdrop-blur-xl">
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-white text-center tracking-tight mb-3">
+                  Build your customized AI curriculum in seconds.
+                </h1>
+                <p className="text-sm sm:text-base text-slate-400 text-center mb-8 max-w-md mx-auto">
+                  Enter your targeted domain or topic below to generate adaptive study paths and real-time execution environments.
+                </p>
+
+                <form onSubmit={handleGenerate} className="space-y-4">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={topicInput}
+                      onChange={(e) => setTopicInput(e.target.value)}
+                      placeholder="e.g. Distributed Model Training, Quantization, LLM Architecture"
+                      disabled={loading}
+                      className="w-full bg-[#0b1120]/90 border border-slate-700/80 rounded-xl px-5 py-4 text-slate-100 placeholder-slate-500 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-indigo-500/80 transition shadow-inner disabled:opacity-50"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading || !topicInput.trim()}
+                    className="w-full bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-500/25 transition duration-200 flex items-center justify-center gap-2 group disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Compiling Path...</span>
+                      </div>
+                    ) : (
+                      <>
+                        <span>Generate Workspace</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                {/* Suggested Topics */}
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-6 pt-4 border-t border-slate-800/60 text-xs">
+                  <span className="text-slate-400 font-medium mr-1">Quick Select:</span>
+                  {SUGGESTED_TOPICS.map((topic) => (
+                    <button
+                      key={topic.name}
+                      type="button"
+                      onClick={() => handleSelectPill(topic.name)}
+                      disabled={loading}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700/60 bg-[#0b1120]/50 text-slate-300 hover:border-indigo-500/50 hover:bg-slate-800 hover:text-white transition"
+                    >
+                      <span>{topic.icon}</span>
+                      <span>{topic.name}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Error Banner */}
+                {error && (
+                  <div className="mt-6 flex items-center gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-300 text-sm text-left">
+                    <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                    <p>{error}</p>
+                  </div>
+                )}
+
+                {/* Feature Tags */}
+                <div className="grid grid-cols-3 gap-3 mt-8 pt-6 border-t border-slate-800 text-xs text-slate-400 text-center">
+                  <div className="flex items-center justify-center gap-1.5">
+                    <Zap className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Instant Setup</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Interactive Labs</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Enterprise Safe</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Generated Curriculum Workspace State */
+          <div className="w-full space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+              <button
+                onClick={() => setSkillPath(null)}
+                className="flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-slate-200 bg-slate-800/60 border border-slate-700/80 px-4 py-2 rounded-lg transition hover:bg-slate-800"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Generate New Curriculum</span>
+              </button>
+            </div>
+
+            <CurriculumView
+              data={skillPath}
+              onSelectLesson={handleSelectLesson}
+            />
+          </div>
+        )}
       </main>
 
-      {/* FOOTER */}
-      <footer className="w-full border-t border-slate-800/80 bg-slate-950/90 py-10 text-slate-400">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-4 sm:flex-row sm:px-6">
-          <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded bg-indigo-600 text-xs font-bold text-white">
-              E
-            </div>
-            <span className="text-sm font-semibold text-slate-200">
-              EduTechAI © {new Date().getFullYear()}
-            </span>
-          </div>
-
-          <nav className="flex flex-wrap justify-center gap-6 text-xs font-medium">
-            <a href="#" className="transition-colors hover:text-indigo-400">
-              Home
-            </a>
-            <a href="#about" className="transition-colors hover:text-indigo-400">
-              About
-            </a>
-            <a href="#services" className="transition-colors hover:text-indigo-400">
-              Services
-            </a>
-            <a href="#contact" className="transition-colors hover:text-indigo-400">
-              Contact
-            </a>
-            <a href="#account" className="transition-colors hover:text-indigo-400">
-              Account
-            </a>
-          </nav>
-        </div>
-      </footer>
-
-      {/* EXERCISE MODAL */}
+      {/* Interactive Modal Handler */}
       <ExerciseModal
         lesson={selectedLesson}
         isOpen={isModalOpen}
