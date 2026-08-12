@@ -1,53 +1,70 @@
 "use client";
 
 import React from "react";
-import { LessonContentResponse } from "@/lib/types";
+import type { Lesson } from "@/lib/types";
 
 interface LessonModalProps {
-  lesson: LessonContentResponse;
+  lesson: Lesson | null;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-export function LessonModal({ lesson, onClose }: LessonModalProps) {
+export default function LessonModal({ lesson, isOpen, onClose }: LessonModalProps) {
+  if (!isOpen || !lesson) return null;
+
   return (
-    <article style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      <header style={{ borderBottom: "1px solid #e2e8f0", paddingBottom: "12px" }}>
-        <h2 style={{ margin: 0, color: "#0f172a", fontSize: "1.5rem" }}>
-          {lesson.title}
-        </h2>
-      </header>
-
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
       <div
-        style={{
-          fontSize: "1rem",
-          lineHeight: "1.6",
-          color: "#334155",
-          whiteSpace: "pre-wrap",
-        }}
-      >
-        {lesson.content}
-      </div>
+        className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
 
-      {lesson.key_takeaways && lesson.key_takeaways.length > 0 && (
-        <div
-          style={{
-            backgroundColor: "#f0f9ff",
-            border: "1px solid #bae6fd",
-            padding: "16px",
-            borderRadius: "6px",
-            marginTop: "12px",
-          }}
-        >
-          <h4 style={{ margin: "0 0 8px 0", color: "#0369a1" }}>Key Takeaways</h4>
-          <ul style={{ margin: 0, paddingLeft: "20px", color: "#0c4a6e" }}>
-            {lesson.key_takeaways.map((item, index) => (
-              <li key={index} style={{ marginBottom: "4px" }}>
-                {item}
-              </li>
-            ))}
-          </ul>
+      {/* Modal Dialog */}
+      <div className="relative z-10 w-full max-w-xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-4 text-slate-100">
+        <div className="flex items-start justify-between border-b border-slate-800 pb-3">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
+              Lesson Overview
+            </span>
+            <h3 className="text-xl font-bold text-white">{lesson.title}</h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+          >
+            ✕
+          </button>
         </div>
-      )}
-    </article>
+
+        {/* Lesson Details */}
+        <div className="space-y-3 text-sm text-slate-300">
+          {lesson.description && <p>{lesson.description}</p>}
+
+          {lesson.duration && (
+            <div className="inline-flex items-center gap-1.5 rounded-md bg-slate-800/80 px-2.5 py-1 text-xs text-slate-300">
+              <span>⏱️ Duration:</span>
+              <span className="font-semibold text-white">{lesson.duration}</span>
+            </div>
+          )}
+
+          {lesson.content && (
+            <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/50 p-4 font-mono text-xs text-slate-200">
+              {lesson.content}
+            </div>
+          )}
+        </div>
+
+        {/* Modal Actions */}
+        <div className="flex justify-end pt-2">
+          <button
+            onClick={onClose}
+            className="rounded-xl bg-indigo-600 px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-indigo-500"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

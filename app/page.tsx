@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { generateSkillPath } from "@/lib/api";
-import type { SkillPathResponse } from "@/lib/types";
+import type { SkillPathResponse, Lesson } from "@/lib/types";
 import CurriculumView from "@/components/CurriculumView";
+import LessonModal from "@/components/LessonModal";
 
 const NAV_LINKS = [
   { name: "Home", href: "#" },
@@ -27,6 +28,10 @@ export default function Home() {
   const [pathData, setPathData] = useState<SkillPathResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Lesson Modal State
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchPathForTopic = async (topicToFetch: string) => {
     if (!topicToFetch.trim()) return;
@@ -55,6 +60,17 @@ export default function Home() {
     fetchPathForTopic(topic);
   };
 
+  // Lesson Selection Handler
+  const handleSelectLesson = (lesson: Lesson) => {
+    setSelectedLesson(lesson);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedLesson(null);
+  };
+
   const totalLessons =
     pathData?.modules?.reduce(
       (acc, mod) => acc + (mod.lessons?.length || 0),
@@ -72,7 +88,6 @@ export default function Home() {
       {/* HEADER NAVBAR */}
       <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-indigo-500 to-blue-600 font-bold text-white shadow-md shadow-indigo-500/20">
               E
@@ -82,7 +97,6 @@ export default function Home() {
             </span>
           </Link>
 
-          {/* Navigation Links */}
           <nav className="hidden items-center gap-6 text-sm font-medium text-slate-300 md:flex">
             {NAV_LINKS.map((link) => (
               <a
@@ -95,7 +109,6 @@ export default function Home() {
             ))}
           </nav>
 
-          {/* Account Button */}
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -120,7 +133,7 @@ export default function Home() {
         </div>
       </header>
 
-      {/* MAIN CONTENT AREA */}
+      {/* MAIN CONTENT */}
       <main className="flex-1">
         <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8 space-y-10">
           {/* Hero Banner Header */}
@@ -243,6 +256,7 @@ export default function Home() {
               <CurriculumView
                 pathData={pathData}
                 modules={pathData.modules || []}
+                onSelectLesson={handleSelectLesson}
               />
             </section>
           )}
@@ -280,6 +294,13 @@ export default function Home() {
           </nav>
         </div>
       </footer>
+
+      {/* LESSON MODAL */}
+      <LessonModal
+        lesson={selectedLesson}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }

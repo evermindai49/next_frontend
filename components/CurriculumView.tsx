@@ -1,47 +1,44 @@
 "use client";
 
 import React from "react";
-import type { SkillPathResponse, ModuleItem, LessonItem } from "@/lib/types";
+import type { SkillPathResponse, Lesson } from "@/lib/types";
 
 interface CurriculumViewProps {
-  pathData?: SkillPathResponse;
-  modules: ModuleItem[];
-  onSelectLesson?: (lesson: LessonItem) => void;
+  pathData: SkillPathResponse;
+  modules: any[];
+  onSelectLesson?: (lesson: Lesson) => void;
 }
 
-export default function CurriculumView({ pathData, modules, onSelectLesson }: CurriculumViewProps) {
-  if (!modules || modules.length === 0) {
-    return (
-      <div className="p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded">
-        No modules found in this learning path.
-      </div>
-    );
-  }
-
+export default function CurriculumView({
+  modules,
+  onSelectLesson,
+}: CurriculumViewProps) {
   return (
-    <div className="space-y-4 text-black">
-      {pathData && (
-        <div className="bg-gray-100 p-4 rounded border">
-          <h2 className="text-xl font-bold">{pathData.title}</h2>
-          <p className="text-sm text-gray-600">{pathData.description}</p>
-        </div>
-      )}
-
-      {modules.map((module: ModuleItem, modIndex: number) => (
-        <div key={module.id || modIndex} className="border p-4 rounded bg-white shadow-sm space-y-2">
-          <h3 className="text-lg font-bold">{module.title}</h3>
-          <p className="text-sm text-gray-600 mb-3">{module.description}</p>
+    <div className="space-y-4">
+      {modules.map((mod, modIdx) => (
+        <div
+          key={mod.id || modIdx}
+          className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 backdrop-blur-md"
+        >
+          <h3 className="text-base font-semibold text-white mb-3">
+            Module {modIdx + 1}: {mod.title}
+          </h3>
 
           <div className="space-y-2">
-            {module.lessons?.map((lesson: LessonItem, lesIndex: number) => (
+            {mod.lessons?.map((lesson: Lesson, lessonIdx: number) => (
               <div
-                key={lesson.id || lesson.lesson_id || lesIndex}
+                key={lesson.id || lessonIdx}
                 onClick={() => onSelectLesson?.(lesson)}
-                className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded cursor-pointer border"
+                className="flex items-center justify-between rounded-lg border border-slate-800/80 bg-slate-950/60 p-3 text-sm text-slate-200 cursor-pointer transition-all hover:border-indigo-500/50 hover:bg-slate-800/50 hover:text-white"
               >
-                <span className="font-medium text-sm">{lesson.title}</span>
-                <span className="text-xs bg-gray-200 px-2 py-1 rounded">
-                  {lesson.duration || "10 mins"}
+                <div className="flex items-center gap-3">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-xs text-indigo-400">
+                    {lessonIdx + 1}
+                  </span>
+                  <span>{lesson.title}</span>
+                </div>
+                <span className="text-xs text-indigo-400 opacity-0 transition-opacity group-hover:opacity-100 sm:opacity-100">
+                  View →
                 </span>
               </div>
             ))}
