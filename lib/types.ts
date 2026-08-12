@@ -4,7 +4,6 @@ export interface Lesson {
   description?: string;
   duration?: string;
   content?: string;
-  completed?: boolean;
 }
 
 export interface Module {
@@ -25,22 +24,18 @@ export interface SkillPathResponse {
 export interface LessonContentResponse {
   title: string;
   content: string;
-  key_takeaways: string[];
+  key_takeaways?: string[];
 }
 
 export interface ExerciseResponse {
   title: string;
   instructions: string;
-  initial_code: string;
-  hints: string[];
-  options?: string[];
-  question?: string;
-  solution?: string;
+  starter_code?: string;
 }
 
 export interface FeedbackResponse {
-  is_correct: boolean;
   score: number;
+  passed: boolean;
   feedback: string;
-  suggestions: string[];
+  recommended_areas?: string[];
 }
