@@ -1,44 +1,70 @@
 "use client";
 
-import { useState } from "react";
-import { Navbar } from "@/components/Navbar";
-import { AmbientBackground } from "@/components/AmbientBackground";
-import { CurriculumView } from "@/components/CurriculumView";
-// Ensure this import is accurate and default if appropriate
+import React, { useState } from "react";
+import Navbar from "@/components/Navbar";
+import AmbientBackground from "@/components/AmbientBackground";
+import CurriculumView from "@/components/CurriculumView";
 import ExerciseModal from "@/components/ExerciseModal";
-import { SkillPathResponse, Lesson } from "@/lib/types";
+
+import type { SkillPathResponse, Lesson } from "@/lib/types";
 import { generateSkillPath } from "@/lib/api";
-import { Sparkles, ArrowRight, ShieldCheck, Zap, BookOpen, Loader2 } from "lucide-react";
+import {
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
+  Zap,
+  BookOpen,
+  Loader2,
+  AlertCircle,
+  RotateCcw,
+} from "lucide-react";
+
+const SUGGESTED_TOPICS = [
+  { name: "LLM Architecture", icon: "🤖" },
+  { name: "Quantization & ONNX", icon: "⚡" },
+  { name: "FastAPI Production", icon: "🚀" },
+  { name: "Distributed Training", icon: "🌐" },
+];
 
 export default function Home() {
   const [topicInput, setTopicInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [skillPath, setSkillPath] = useState<SkillPathResponse | null>(null);
 
-  // Modal State Management
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!topicInput.trim()) return;
+  const executeGeneration = async (topicToFetch: string) => {
+    if (!topicToFetch.trim()) return;
 
     setLoading(true);
+    setError(null);
+
     try {
-      const data = await generateSkillPath(topicInput, "Intermediate");
+      const data = await generateSkillPath(topicToFetch.trim(), "Intermediate");
       setSkillPath(data);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        alert(err.message);
+        setError(err.message);
       } else {
-        alert("Failed to generate skill path.");
+        setError("Failed to generate skill path. Please try again.");
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // Handler for selecting a lesson from CurriculumView
+  const handleGenerate = (e: React.FormEvent) => {
+    e.preventDefault();
+    executeGeneration(topicInput);
+  };
+
+  const handleSelectPill = (topic: string) => {
+    setTopicInput(topic);
+    executeGeneration(topic);
+  };
+
   const handleSelectLesson = (lesson: Lesson) => {
     setSelectedLesson(lesson);
     setIsModalOpen(true);
@@ -50,13 +76,12 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b1120] text-slate-100 relative overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-[#0b1120] text-slate-100 relative overflow-hidden flex flex-col selection:bg-indigo-500 selection:text-white">
       <AmbientBackground />
       <Navbar />
 
-      <main className="flex-1 relative z-10 flex flex-col items-center justify-center px-6 py-12 max-w-6xl mx-auto w-full">
+      <main className="flex-1 relative z-10 flex flex-col items-center justify-center px-4 py-12 max-w-6xl mx-auto w-full sm:px-6">
         {!skillPath ? (
-          /* Initial Hero Input State */
           <div className="w-full max-w-2xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold mb-8 backdrop-blur-md">
               <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
@@ -84,17 +109,21 @@ export default function Home() {
                       value={topicInput}
                       onChange={(e) => setTopicInput(e.target.value)}
                       placeholder="e.g. Distributed Model Training, Quantization, LLM Architecture"
-                      className="w-full bg-[#0b1120]/90 border border-slate-700/80 rounded-xl px-5 py-4 text-slate-100 placeholder-slate-500 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-indigo-500/80 transition shadow-inner"
+                      disabled={loading}
+                      className="w-full bg-[#0b1120]/90 border border-slate-700/80 rounded-xl px-5 py-4 text-slate-100 placeholder-slate-500 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-indigo-500/80 transition shadow-inner disabled:opacity-50"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || !topicInput.trim()}
                     className="w-full bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-500/25 transition duration-200 flex items-center justify-center gap-2 group disabled:opacity-50"
                   >
                     {loading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Compiling Path...</span>
+                      </div>
                     ) : (
                       <>
                         <span>Generate Workspace</span>
@@ -103,6 +132,29 @@ export default function Home() {
                     )}
                   </button>
                 </form>
+
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-6 pt-4 border-t border-slate-800/60 text-xs">
+                  <span className="text-slate-400 font-medium mr-1">Quick Select:</span>
+                  {SUGGESTED_TOPICS.map((topic) => (
+                    <button
+                      key={topic.name}
+                      type="button"
+                      onClick={() => handleSelectPill(topic.name)}
+                      disabled={loading}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700/60 bg-[#0b1120]/50 text-slate-300 hover:border-indigo-500/50 hover:bg-slate-800 hover:text-white transition"
+                    >
+                      <span>{topic.icon}</span>
+                      <span>{topic.name}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {error && (
+                  <div className="mt-6 flex items-center gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-300 text-sm text-left">
+                    <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                    <p>{error}</p>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-3 gap-3 mt-8 pt-6 border-t border-slate-800 text-xs text-slate-400 text-center">
                   <div className="flex items-center justify-center gap-1.5">
@@ -122,26 +174,25 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          /* Curriculum Workspace State */
           <div className="w-full space-y-6">
-            <button
-              onClick={() => setSkillPath(null)}
-              className="text-xs font-semibold text-slate-400 hover:text-slate-200 bg-slate-800/60 border border-slate-700/80 px-4 py-2 rounded-lg transition"
-            >
-              ← Generate New Curriculum
-            </button>
-            
-            {/* CurriculumView handles listing lessons */}
-            <CurriculumView 
-              data={skillPath} 
-              onSelectLesson={handleSelectLesson} // <-- Ensure this callback is passed
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+              <button
+                onClick={() => setSkillPath(null)}
+                className="flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-slate-200 bg-slate-800/60 border border-slate-700/80 px-4 py-2 rounded-lg transition hover:bg-slate-800"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Generate New Curriculum</span>
+              </button>
+            </div>
+
+            <CurriculumView
+              data={skillPath}
+              onSelectLesson={handleSelectLesson}
             />
           </div>
         )}
       </main>
 
-      {/* 4. UPDATE: Mount ExerciseModal here at the bottom */}
-      {/* It now accepts 'lesson' via the updated interface */}
       <ExerciseModal
         lesson={selectedLesson}
         isOpen={isModalOpen}
