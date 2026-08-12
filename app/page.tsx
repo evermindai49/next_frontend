@@ -5,7 +5,7 @@ import Link from "next/link";
 import { generateSkillPath } from "@/lib/api";
 import type { SkillPathResponse, Lesson } from "@/lib/types";
 import CurriculumView from "@/components/CurriculumView";
-import LessonModal from "@/components/LessonModal";
+import ExerciseModal from "@/components/ExerciseModal";
 
 const NAV_LINKS = [
   { name: "Home", href: "#" },
@@ -78,13 +78,13 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-950 text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
-      {/* Background Accent Glows */}
+      {/* Background Glows */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-indigo-600/15 blur-[120px]" />
         <div className="absolute top-1/3 -right-40 h-[500px] w-[500px] rounded-full bg-blue-600/15 blur-[120px]" />
       </div>
 
-      {/* HEADER NAVBAR */}
+      {/* NAVBAR */}
       <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
           <Link href="/" className="flex items-center gap-2">
@@ -288,8 +288,8 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* INTERACTIVE LESSON & EXERCISE MODAL */}
-      <LessonModal
+      {/* EXERCISE MODAL */}
+      <ExerciseModal
         lesson={selectedLesson}
         isOpen={isModalOpen}
         onClose={handleCloseModal}

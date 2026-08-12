@@ -1,18 +1,18 @@
 "use client";
 
 import React from "react";
-import type { ExerciseResponse, Lesson } from "@/lib/types";
+import type { Lesson, ExerciseResponse } from "@/lib/types";
 
 export interface ExerciseModalProps {
-  exercise?: ExerciseResponse | null;
   lesson?: Lesson | null;
+  exercise?: ExerciseResponse | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
 export default function ExerciseModal({
-  exercise,
   lesson,
+  exercise,
   isOpen,
   onClose,
 }: ExerciseModalProps) {
@@ -23,7 +23,6 @@ export default function ExerciseModal({
     exercise?.instructions ||
     lesson?.description ||
     "Complete the exercise instructions below.";
-  const initialCode = exercise?.initial_code || exercise?.starter_code;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -54,54 +53,7 @@ export default function ExerciseModal({
               Instructions
             </h4>
             <p className="text-slate-200">{instructions}</p>
-
-            {exercise?.question && (
-              <div className="mt-2 pt-2 border-t border-slate-800/80 text-slate-300">
-                <span className="font-semibold text-white">Question: </span>
-                {exercise.question}
-              </div>
-            )}
           </div>
-
-          {initialCode && (
-            <div className="space-y-1">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-                Initial Code
-              </label>
-              <pre className="rounded-xl border border-slate-800 bg-slate-950 p-3 font-mono text-xs text-slate-200 overflow-x-auto">
-                <code>{initialCode}</code>
-              </pre>
-            </div>
-          )}
-
-          {exercise?.options && exercise.options.length > 0 && (
-            <div className="space-y-2">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-                Options
-              </label>
-              <ul className="space-y-1.5">
-                {exercise.options.map((opt, idx) => (
-                  <li
-                    key={idx}
-                    className="rounded-lg border border-slate-800 bg-slate-950/40 p-2.5 text-xs text-slate-300"
-                  >
-                    {opt}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {exercise?.solution && (
-            <div className="space-y-1">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-emerald-400">
-                Expected Solution
-              </label>
-              <pre className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 font-mono text-xs text-emerald-300 overflow-x-auto">
-                <code>{exercise.solution}</code>
-              </pre>
-            </div>
-          )}
         </div>
 
         <div className="flex justify-end border-t border-slate-800 pt-3">
