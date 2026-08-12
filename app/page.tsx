@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import AmbientBackground from "@/components/AmbientBackground";
 import CurriculumView from "@/components/CurriculumView";
 import ExerciseModal from "@/components/ExerciseModal";
+
 import type { SkillPathResponse, Lesson } from "@/lib/types";
 import { generateSkillPath } from "@/lib/api";
 import {
@@ -31,7 +32,6 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [skillPath, setSkillPath] = useState<SkillPathResponse | null>(null);
 
-  // Modal state management
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -82,7 +82,6 @@ export default function Home() {
 
       <main className="flex-1 relative z-10 flex flex-col items-center justify-center px-4 py-12 max-w-6xl mx-auto w-full sm:px-6">
         {!skillPath ? (
-          /* Initial Hero Input State */
           <div className="w-full max-w-2xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold mb-8 backdrop-blur-md">
               <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
@@ -90,13 +89,11 @@ export default function Home() {
             </div>
 
             <div className="relative w-full">
-              {/* Outer Glow Effect */}
               <div
                 aria-hidden="true"
                 className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 opacity-30 blur-2xl transition duration-1000 animate-pulse"
               />
 
-              {/* Main Card Wrapper */}
               <div className="relative w-full rounded-2xl bg-[#172033]/90 border border-slate-700/70 p-8 sm:p-10 shadow-2xl backdrop-blur-xl">
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-white text-center tracking-tight mb-3">
                   Build your customized AI curriculum in seconds.
@@ -136,7 +133,6 @@ export default function Home() {
                   </button>
                 </form>
 
-                {/* Quick Select Pills */}
                 <div className="flex flex-wrap items-center justify-center gap-2 mt-6 pt-4 border-t border-slate-800/60 text-xs">
                   <span className="text-slate-400 font-medium mr-1">Quick Select:</span>
                   {SUGGESTED_TOPICS.map((topic) => (
@@ -153,7 +149,6 @@ export default function Home() {
                   ))}
                 </div>
 
-                {/* Inline Error Notice */}
                 {error && (
                   <div className="mt-6 flex items-center gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-300 text-sm text-left">
                     <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
@@ -161,7 +156,6 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* Feature Tags */}
                 <div className="grid grid-cols-3 gap-3 mt-8 pt-6 border-t border-slate-800 text-xs text-slate-400 text-center">
                   <div className="flex items-center justify-center gap-1.5">
                     <Zap className="w-3.5 h-3.5 text-indigo-400" />
@@ -180,7 +174,6 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          /* Curriculum Workspace State */
           <div className="w-full space-y-6">
             <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
               <button
@@ -200,7 +193,6 @@ export default function Home() {
         )}
       </main>
 
-      {/* Dynamic Exercise Modal */}
       <ExerciseModal
         lesson={selectedLesson}
         isOpen={isModalOpen}
