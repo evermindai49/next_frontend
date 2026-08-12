@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import type { SkillPathResponse, Lesson } from "@/lib/types";
-import { BookOpen, ChevronRight, Clock, Award } from "lucide-react";
+import type { SkillPathResponse, Module, Lesson } from "@/lib/types";
+import { BookOpen, CheckCircle, Clock, ChevronRight } from "lucide-react";
 
 export interface CurriculumViewProps {
   data: SkillPathResponse | null;
-  onSelectLesson?: (lesson: Lesson) => void;
+  onSelectLesson: (lesson: Lesson) => void;
 }
 
 export default function CurriculumView({
@@ -15,102 +15,84 @@ export default function CurriculumView({
 }: CurriculumViewProps) {
   if (!data) return null;
 
-  // Safely cast or access dynamic attributes
-  const safeData = data as SkillPathResponse & { description?: string };
-
   return (
     <div className="w-full space-y-8">
-      {/* Overview Card */}
-      <div className="rounded-2xl border border-slate-800 bg-[#172033]/80 p-6 sm:p-8 backdrop-blur-xl shadow-xl space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
-          <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
-              Target Topic
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-              {data.topic || "Curriculum Overview"}
-            </h2>
-          </div>
-          {data.difficulty && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-              <Award className="w-3.5 h-3.5" />
-              {data.difficulty}
-            </span>
-          )}
+      {/* Header Info Banner */}
+      <div 
+        className="w-full rounded-2xl border-2 border-slate-600 bg-[#1e293b] p-6 sm:p-8 shadow-xl space-y-3 text-white"
+        style={{ backgroundColor: "#1e293b", opacity: 1, color: "#ffffff" }}
+      >
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950 border border-indigo-500/50 text-indigo-300 text-xs font-bold">
+          <span>{data.difficulty || "Intermediate"} Path</span>
         </div>
-
-        {safeData.description && (
-          <p className="text-sm sm:text-base text-slate-300">
-            {safeData.description}
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+          {data.topic}
+        </h2>
+        {data.description && (
+          <p className="text-slate-200 text-sm sm:text-base leading-relaxed max-w-3xl">
+            {data.description}
           </p>
         )}
       </div>
 
       {/* Modules List */}
       <div className="space-y-6">
-        <h3 className="text-xl font-bold text-white flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-indigo-400" />
-          <span>Learning Modules</span>
-        </h3>
+        {data.modules?.map((module: Module, modIdx: number) => (
+          <div
+            key={module.id || modIdx}
+            className="w-full rounded-2xl border-2 border-slate-700 bg-[#1e293b] p-6 shadow-2xl space-y-4"
+            style={{ backgroundColor: "#1e293b", opacity: 1 }}
+          >
+            <div className="border-b border-slate-700 pb-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
+                Module {modIdx + 1}
+              </span>
+              <h3 className="text-xl font-bold text-white mt-1">
+                {module.title}
+              </h3>
+              {module.description && (
+                <p className="text-xs text-slate-300 mt-1">
+                  {module.description}
+                </p>
+              )}
+            </div>
 
-        <div className="grid gap-6">
-          {data.modules?.map((module, mIdx) => {
-            const safeModule = module as typeof module & { description?: string };
+            {/* Lessons List inside Module */}
+            <div className="grid gap-3">
+              {module.lessons?.map((lesson: Lesson, lesIdx: number) => (
+                <div
+                  key={lesson.id || lesIdx}
+                  onClick={() => onSelectLesson(lesson)}
+                  className="group flex items-center justify-between p-4 rounded-xl border border-slate-700 bg-[#0f172a] hover:border-indigo-400 hover:bg-[#111c35] transition duration-150 cursor-pointer"
+                  style={{ backgroundColor: "#0f172a", opacity: 1 }}
+                >
+                  <div className="flex items-center gap-3.5">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-950 border border-indigo-500/40 text-indigo-300 group-hover:bg-indigo-600 group-hover:text-white transition">
+                      <BookOpen className="h-4 w-4" />
+                    </div>
 
-            return (
-              <div
-                key={module.id || mIdx}
-                className="rounded-2xl border border-slate-800 bg-[#172033]/60 p-6 backdrop-blur-md shadow-lg space-y-4"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
-                      Module {mIdx + 1}
-                    </span>
-                    <h4 className="text-lg font-bold text-white">
-                      {module.title}
-                    </h4>
-                    {safeModule.description && (
-                      <p className="text-xs text-slate-400 mt-1">
-                        {safeModule.description}
-                      </p>
-                    )}
+                    <div>
+                      <h4 className="text-sm font-bold text-white group-hover:text-indigo-300 transition">
+                        {lesson.title}
+                      </h4>
+                      {lesson.duration && (
+                        <div className="flex items-center gap-1.5 text-xs text-slate-300 mt-0.5">
+                          <Clock className="h-3 w-3 text-slate-400" />
+                          <span>{lesson.duration}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs font-semibold text-indigo-300 group-hover:text-white transition">
+                    <span>Preview Lesson</span>
+                    <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
-
-                {/* Lessons Grid */}
-                <div className="divide-y divide-slate-800/60 border-t border-slate-800/60 pt-2">
-                  {module.lessons?.map((lesson, lIdx) => (
-                    <div
-                      key={lesson.id || lIdx}
-                      onClick={() => onSelectLesson?.(lesson)}
-                      className="group flex items-center justify-between py-3.5 px-2 rounded-xl hover:bg-slate-800/50 cursor-pointer transition"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20 group-hover:bg-indigo-500 group-hover:text-white transition">
-                          {lIdx + 1}
-                        </div>
-                        <div>
-                          <h5 className="text-sm font-semibold text-slate-200 group-hover:text-white transition">
-                            {lesson.title}
-                          </h5>
-                          {lesson.duration && (
-                            <span className="flex items-center gap-1 text-[11px] text-slate-400 mt-0.5">
-                              <Clock className="w-3 h-3" />
-                              {lesson.duration}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
