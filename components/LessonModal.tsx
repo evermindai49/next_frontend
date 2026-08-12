@@ -29,32 +29,38 @@ export default function LessonModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
+      {/* Dark Overlay Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity"
         onClick={onClose}
       />
 
-      {/* Modal Window */}
-      <div className="relative z-10 w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 p-6 sm:p-8 shadow-2xl space-y-6 text-slate-100 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-start justify-between border-b border-slate-800 pb-4">
+      {/* Solid Opaque Main Container */}
+      <div 
+        className="relative z-10 w-full max-w-3xl rounded-2xl border-2 border-slate-600 bg-[#1e293b] p-6 sm:p-8 shadow-2xl space-y-6 text-white max-h-[90vh] overflow-y-auto"
+        style={{ backgroundColor: "#1e293b", color: "#ffffff", opacity: 1 }}
+      >
+        <div className="flex items-start justify-between border-b border-slate-700 pb-4">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
-              Interactive Lesson
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
+              Interactive Lesson Preview
             </span>
-            <h3 className="text-2xl font-bold text-white">{lesson.title}</h3>
+            <h3 className="text-2xl font-bold text-white mt-1">{lesson.title}</h3>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+            className="rounded-lg p-2 text-slate-300 transition-colors hover:bg-slate-700 hover:text-white"
           >
             ✕
           </button>
         </div>
 
-        {/* Lesson Description/Content */}
+        {/* Lesson Description Container */}
         {lesson.description && (
-          <div className="text-slate-300 text-sm leading-relaxed border-b border-slate-800/80 pb-4">
+          <div 
+            className="rounded-xl border border-slate-700 bg-[#0f172a] p-5 text-slate-100 text-sm leading-relaxed"
+            style={{ backgroundColor: "#0f172a", color: "#f8fafc" }}
+          >
             {lesson.description}
           </div>
         )}
@@ -67,17 +73,17 @@ export default function LessonModal({
             {exercises.map((ex: ExerciseResponse, exIdx: number) => (
               <div
                 key={ex.id || exIdx}
-                className="rounded-xl border border-slate-800 bg-slate-950/60 p-5 space-y-4"
+                className="rounded-xl border border-slate-700 bg-[#0f172a] p-5 space-y-4"
+                style={{ backgroundColor: "#0f172a" }}
               >
-                <h5 className="font-semibold text-slate-100 text-base">
+                <h5 className="font-semibold text-white text-base">
                   {exIdx + 1}. {ex.title || ex.question || "Exercise Check"}
                 </h5>
 
                 {ex.instructions && (
-                  <p className="text-xs text-slate-400">{ex.instructions}</p>
+                  <p className="text-xs text-slate-300">{ex.instructions}</p>
                 )}
 
-                {/* Explicitly typed parameters for options mapping */}
                 {ex.options && ex.options.length > 0 && (
                   <div className="grid gap-2 pt-2">
                     {ex.options.map((opt: string, idx: number) => {
@@ -89,12 +95,12 @@ export default function LessonModal({
                           onClick={() => handleSelectOption(exIdx, idx)}
                           className={`flex items-center justify-between px-4 py-3 rounded-lg border text-xs font-medium transition text-left ${
                             isSelected
-                              ? "border-indigo-500 bg-indigo-500/10 text-indigo-300"
-                              : "border-slate-800 bg-slate-900/50 text-slate-300 hover:border-slate-700"
+                              ? "border-indigo-500 bg-indigo-600 text-white"
+                              : "border-slate-700 bg-[#1e293b] text-slate-200 hover:border-slate-500"
                           }`}
                         >
                           <span>{opt}</span>
-                          {isSelected && <span className="text-indigo-400">✓</span>}
+                          {isSelected && <span className="text-white font-bold">✓</span>}
                         </button>
                       );
                     })}
@@ -105,10 +111,10 @@ export default function LessonModal({
           </div>
         )}
 
-        <div className="flex justify-end border-t border-slate-800 pt-4">
+        <div className="flex justify-end border-t border-slate-700 pt-4">
           <button
             onClick={onClose}
-            className="rounded-xl bg-slate-800 px-5 py-2.5 text-xs font-semibold text-slate-200 transition-all hover:bg-slate-700 hover:text-white"
+            className="rounded-xl bg-slate-700 px-6 py-2.5 text-xs font-bold text-white transition hover:bg-slate-600"
           >
             Close Lesson
           </button>
