@@ -30,7 +30,11 @@ export interface LessonContentResponse {
 export interface ExerciseResponse {
   title: string;
   instructions: string;
+  question?: string;
   starter_code?: string;
+  initial_code?: string;
+  options?: string[];
+  solution?: string;
 }
 
 export interface FeedbackResponse {
