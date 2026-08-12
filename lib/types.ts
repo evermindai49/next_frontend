@@ -1,36 +1,25 @@
-// lib/types.ts
-
-// lib/types.ts
-
-// lib/types.ts
-
-export interface LessonItem {
-  id?: string;
-  lesson_id: string;
-  title: string;
-  duration: string;
-}
-
-export interface ModuleItem {
+export interface Lesson {
   id?: string;
   title: string;
-  description: string;
-  lessons: LessonItem[];
+  description?: string;
+  duration?: string;
+  content?: string;
+  completed?: boolean;
 }
 
-// lib/types.ts
+export interface Module {
+  id?: string;
+  title: string;
+  description?: string;
+  lessons: Lesson[];
+}
 
 export interface SkillPathResponse {
-  title: string;
-  description: string;
-  topic?: string;
-  subject?: string;
-  category?: string;
-  technology?: string;
-  course_name?: string;
+  id?: string;
+  topic: string;
   difficulty?: string;
-  level?: string;
-  modules: ModuleItem[];
+  summary?: string;
+  modules: Module[];
 }
 
 export interface LessonContentResponse {

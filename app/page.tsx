@@ -29,7 +29,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Lesson Modal State
+  // Modal State
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -60,7 +60,6 @@ export default function Home() {
     fetchPathForTopic(topic);
   };
 
-  // Lesson Selection Handler
   const handleSelectLesson = (lesson: Lesson) => {
     setSelectedLesson(lesson);
     setIsModalOpen(true);
@@ -136,7 +135,6 @@ export default function Home() {
       {/* MAIN CONTENT */}
       <main className="flex-1">
         <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8 space-y-10">
-          {/* Hero Banner Header */}
           <header className="text-center space-y-4">
             <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-xs font-semibold tracking-wide uppercase text-indigo-300 shadow-sm">
               <span>✨ AI Curriculum Generator</span>
@@ -150,7 +148,6 @@ export default function Home() {
             </p>
           </header>
 
-          {/* Input & Control Card */}
           <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
             <form onSubmit={handleFormSubmit} className="flex flex-col gap-4 sm:flex-row sm:items-end">
               <div className="flex-1 space-y-2">
@@ -187,7 +184,6 @@ export default function Home() {
               </button>
             </form>
 
-            {/* Quick Topics Pills */}
             <div className="flex flex-wrap items-center gap-2 border-t border-slate-800/80 pt-4 text-xs">
               <span className="font-medium text-slate-400 mr-1">Suggested:</span>
               {POPULAR_TOPICS.map((item) => {
@@ -212,7 +208,6 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Error Notification */}
           {error && (
             <div className="flex items-center gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-300 backdrop-blur-md">
               <span className="text-xl">⚠️</span>
@@ -220,7 +215,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* Skeleton Loading State */}
           {loading && (
             <div className="space-y-4 animate-pulse">
               <div className="h-24 rounded-2xl border border-slate-800 bg-slate-900/40" />
@@ -229,7 +223,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* Curriculum Results View */}
           {!loading && pathData && (
             <section className="space-y-6">
               <div className="grid grid-cols-2 gap-4 rounded-xl border border-slate-800 bg-slate-900/40 p-4 text-center backdrop-blur-sm sm:grid-cols-3">
