@@ -1,217 +1,167 @@
 "use client";
 
-import { useState } from "react";
-import { generateSkillPath } from "@/lib/api";
-import type { SkillPathResponse } from "@/lib/types";
-import CurriculumView from "@/components/CurriculumView";
+import React from "react";
 import {
-  Sparkles,
-  Search,
-  BookOpen,
-  Layers,
-  GraduationCap,
   ArrowRight,
-  AlertCircle,
-  Zap,
-  Code2,
-  Box,
-  Globe,
-  Database,
-  Cpu,
+  ChevronDown,
+  Crown,
+  Users,
+  RefreshCw,
+  HeartHandshake,
 } from "lucide-react";
 
-const POPULAR_TOPICS = [
-  { name: "FastAPI", icon: Zap },
-  { name: "Python", icon: Code2 },
-  { name: "Docker", icon: Box },
-  { name: "Next.js", icon: Globe },
-  { name: "PostgreSQL", icon: Database },
-  { name: "Machine Learning", icon: Cpu },
-];
-
 export default function Home() {
-  const [topicInput, setTopicInput] = useState("FastAPI");
-  const [pathData, setPathData] = useState<SkillPathResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchPathForTopic = async (topicToFetch: string) => {
-    if (!topicToFetch.trim()) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const data = await generateSkillPath(topicToFetch.trim());
-      setPathData(data);
-    } catch (err: any) {
-      console.error("Fetch failed:", err);
-      setError(err.message || "Failed to load curriculum for this topic.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    fetchPathForTopic(topicInput);
-  };
-
-  const handleSelectPill = (topic: string) => {
-    setTopicInput(topic);
-    fetchPathForTopic(topic);
-  };
-
-  const totalLessons =
-    pathData?.modules?.reduce(
-      (acc, mod) => acc + (mod.lessons?.length || 0),
-      0
-    ) || 0;
-
   return (
-    <div className="relative min-h-screen bg-slate-950 text-slate-100 antialiased selection:bg-indigo-500 selection:text-white overflow-hidden">
-      {/* Background Accent Glows */}
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-indigo-600/15 blur-[120px]" />
-        <div className="absolute top-1/3 -right-40 h-[500px] w-[500px] rounded-full bg-blue-600/15 blur-[120px]" />
-      </div>
+    <div className="min-h-screen bg-white font-sans text-slate-900 antialiased">
+      {/* ---------------- NAVIGATION HEADER ---------------- */}
+      <header className="sticky top-0 z-50 flex h-20 items-center justify-between border-b border-slate-100 bg-white/95 px-6 backdrop-blur-md lg:px-16">
+        {/* Brand Logo */}
+        <div className="flex items-center gap-10">
+          <a href="#" className="flex items-center gap-2 text-2xl font-black text-[#1D2B96]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1D2B96] text-white">
+              <div className="h-4 w-2 border-r-2 border-white rounded-r-full" />
+            </div>
+            <span>CoachHub</span>
+          </a>
 
-      <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8 space-y-10">
-        {/* Hero Banner Header */}
-        <header className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-xs font-semibold tracking-wide uppercase text-indigo-300 shadow-sm">
-            <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-            <span>AI Curriculum Generator</span>
+          {/* Nav Links */}
+          <nav className="hidden items-center gap-8 md:flex">
+            <a href="#" className="text-sm font-semibold text-slate-800 transition hover:text-indigo-600">
+              Why CoachHub
+            </a>
+            <a href="#" className="text-sm font-semibold text-slate-800 transition hover:text-indigo-600">
+              Solutions
+            </a>
+            <a href="#" className="text-sm font-semibold text-slate-800 transition hover:text-indigo-600">
+              Resources
+            </a>
+            <a href="#" className="text-sm font-semibold text-slate-800 transition hover:text-indigo-600">
+              About
+            </a>
+          </nav>
+        </div>
+
+        {/* Right Actions */}
+        <div className="flex items-center gap-6">
+          <a
+            href="#"
+            className="hidden items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#1D2B96] transition hover:opacity-80 sm:flex"
+          >
+            <span>LOGIN</span>
+            <ArrowRight className="h-4 w-4" />
+          </a>
+
+          <a
+            href="#"
+            className="rounded-full border-2 border-[#1D2B96] px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-[#1D2B96] transition hover:bg-[#1D2B96] hover:text-white"
+          >
+            REQUEST DEMO
+          </a>
+
+          {/* Language Selector */}
+          <button className="flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-slate-900">
+            <span className="text-base">🇺🇸</span>
+            <ChevronDown className="h-4 w-4" />
+          </button>
+        </div>
+      </header>
+
+      {/* ---------------- HERO SECTION ---------------- */}
+      <section className="relative overflow-hidden bg-gradient-to-r from-[#1b2382] via-[#2832a8] to-[#1d2787] text-white">
+        {/* Soft Background Radial Lighting */}
+        <div className="pointer-events-none absolute -left-32 -top-32 h-[600px] w-[600px] rounded-full bg-blue-500/20 blur-[120px]" />
+        <div className="pointer-events-none absolute right-1/4 top-1/4 h-[400px] w-[400px] rounded-full bg-orange-500/30 blur-[100px]" />
+
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-12 px-6 py-16 lg:flex-row lg:px-12 lg:py-24">
+          {/* Hero Content */}
+          <div className="max-w-xl space-y-6">
+            <h1 className="text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+              Transform People and Organizations
+            </h1>
+
+            <p className="text-base font-normal leading-relaxed text-indigo-100 sm:text-lg">
+              Empower your people to thrive with personalized, measurable and
+              scalable digital coaching programs.
+            </p>
+
+            <div className="pt-2">
+              <a
+                href="#"
+                className="inline-block rounded-full bg-[#FF5031] px-8 py-3.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg transition-transform hover:scale-105 hover:bg-[#e04328]"
+              >
+                GET STARTED
+              </a>
+            </div>
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent">
-            EduTech Learning Hub
-          </h1>
-          <p className="mx-auto max-w-2xl text-base sm:text-lg text-slate-400">
-            Design personalized, interactive skill paths powered by intelligent
-            AI course compilation.
-          </p>
-        </header>
 
-        {/* Input & Control Card */}
-        <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
-          <form onSubmit={handleFormSubmit} className="flex flex-col gap-4 sm:flex-row sm:items-end">
-            <div className="flex-1 space-y-2">
-              <label htmlFor="topic" className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-                Target Topic or Discipline
-              </label>
-              <div className="relative">
-                <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-                <input
-                  id="topic"
-                  type="text"
-                  value={topicInput}
-                  onChange={(e) => setTopicInput(e.target.value)}
-                  placeholder="Search topics (e.g., Quantum Computing, FastAPI, System Design)..."
-                  className="w-full rounded-xl border border-slate-700/80 bg-slate-950/80 pl-10 pr-4 py-3 text-sm text-slate-100 placeholder-slate-500 shadow-inner transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
-                  disabled={loading}
-                />
-              </div>
+          {/* Hero Right Visual Column */}
+          <div className="relative flex w-full max-w-xl justify-center lg:justify-end">
+            {/* Arch Mask Container */}
+            <div className="relative h-[420px] w-[320px] overflow-hidden rounded-t-full bg-[#3b47c0]/40 sm:h-[480px] sm:w-[380px]">
+              {/* Profile Image */}
+              <img
+                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
+                alt="Coaching participant"
+                className="h-full w-full object-cover object-center"
+              />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading || !topicInput.trim()}
-              className="flex h-[46px] w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-600 px-7 text-sm font-medium text-white shadow-lg shadow-indigo-500/20 transition-all hover:from-indigo-600 hover:to-blue-700 active:scale-[0.98] disabled:opacity-50"
-            >
-              {loading ? (
-                <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  <span>Compiling Path...</span>
-                </>
-              ) : (
-                <>
-                  <span>Generate Path</span>
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Quick Topics Pills */}
-          <div className="flex flex-wrap items-center gap-2 border-t border-slate-800/80 pt-4 text-xs">
-            <span className="font-medium text-slate-400 mr-1">Suggested:</span>
-            {POPULAR_TOPICS.map((item) => {
-              const Icon = item.icon;
-              const isActive = topicInput.toLowerCase() === item.name.toLowerCase();
-              return (
-                <button
-                  key={item.name}
-                  type="button"
-                  onClick={() => handleSelectPill(item.name)}
-                  disabled={loading}
-                  className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-medium transition-all ${
-                    isActive
-                      ? "border-indigo-500 bg-indigo-600/20 text-indigo-200 shadow-sm shadow-indigo-500/20"
-                      : "border-slate-800 bg-slate-950/40 text-slate-400 hover:border-slate-700 hover:bg-slate-800 hover:text-slate-200"
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  <span>{item.name}</span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Error Notification */}
-        {error && (
-          <div className="flex items-center gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-300 backdrop-blur-md">
-            <AlertCircle className="h-5 w-5 shrink-0 text-red-400" />
-            <p className="text-sm font-medium">{error}</p>
-          </div>
-        )}
-
-        {/* Skeleton Loading State */}
-        {loading && (
-          <div className="space-y-4 animate-pulse">
-            <div className="h-24 rounded-2xl border border-slate-800 bg-slate-900/40" />
-            <div className="h-44 rounded-2xl border border-slate-800 bg-slate-900/40" />
-            <div className="h-44 rounded-2xl border border-slate-800 bg-slate-900/40" />
-          </div>
-        )}
-
-        {/* Curriculum Results View */}
-        {!loading && pathData && (
-          <section className="space-y-6">
-            <div className="grid grid-cols-2 gap-4 rounded-xl border border-slate-800 bg-slate-900/40 p-4 text-center backdrop-blur-sm sm:grid-cols-3">
-              <div className="flex flex-col items-center justify-center p-2">
-                <span className="flex items-center gap-1.5 text-xs text-slate-400">
-                  <Layers className="h-3.5 w-3.5" /> Total Modules
-                </span>
-                <span className="mt-1 text-lg font-bold text-indigo-300">
-                  {pathData.modules?.length || 0} Modules
-                </span>
+            {/* Floating Glassmorphism Feature Badges */}
+            <div className="absolute left-0 top-12 flex flex-col gap-3 sm:-left-12">
+              {/* Badge 1 */}
+              <div className="flex items-center gap-3 rounded-2xl bg-orange-200/90 p-3 pr-6 text-slate-900 shadow-xl backdrop-blur-md">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/20 text-indigo-900">
+                  <Crown className="h-4 w-4" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold leading-tight">Leadership</p>
+                  <p className="text-[11px] text-slate-700">development</p>
+                </div>
               </div>
-              <div className="flex flex-col items-center justify-center p-2">
-                <span className="flex items-center gap-1.5 text-xs text-slate-400">
-                  <BookOpen className="h-3.5 w-3.5" /> Lesson Count
-                </span>
-                <span className="mt-1 text-lg font-bold text-indigo-300">
-                  {totalLessons} Lessons
-                </span>
+
+              {/* Badge 2 */}
+              <div className="flex items-center gap-3 rounded-2xl bg-white/95 p-3 pr-6 text-slate-900 shadow-xl backdrop-blur-md">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
+                  <Users className="h-4 w-4" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold leading-tight">Talent</p>
+                  <p className="text-[11px] text-slate-700">Management</p>
+                </div>
               </div>
-              <div className="col-span-2 flex flex-col items-center justify-center p-2 sm:col-span-1">
-                <span className="flex items-center gap-1.5 text-xs text-slate-400">
-                  <GraduationCap className="h-3.5 w-3.5" /> Difficulty Level
-                </span>
-                <span className="mt-1 text-lg font-bold text-emerald-400">
-                  {pathData.difficulty || "Beginner"}
-                </span>
+
+              {/* Badge 3 */}
+              <div className="flex items-center gap-3 rounded-2xl bg-white/80 p-3 pr-6 text-slate-900 shadow-xl backdrop-blur-md">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
+                  <RefreshCw className="h-4 w-4" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold leading-tight">Change and</p>
+                  <p className="text-[11px] text-slate-700">Transformation</p>
+                </div>
+              </div>
+
+              {/* Badge 4 */}
+              <div className="flex items-center gap-3 rounded-2xl bg-white/60 p-3 pr-6 text-slate-900 shadow-xl backdrop-blur-md">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
+                  <HeartHandshake className="h-4 w-4" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold leading-tight">Well-being</p>
+                  <p className="text-[11px] text-slate-700">and Resilience</p>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <CurriculumView
-              pathData={pathData}
-              modules={pathData.modules || []}
-            />
-          </section>
-        )}
-      </div>
+      {/* ---------------- TRUSTED BY BANNER ---------------- */}
+      <section className="bg-white py-16 text-center">
+        <h2 className="text-2xl font-extrabold text-[#1D2B96] sm:text-3xl">
+          Trusted by 1000+ global companies
+        </h2>
+      </section>
     </div>
   );
 }
