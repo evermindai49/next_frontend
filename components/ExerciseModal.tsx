@@ -27,13 +27,11 @@ export default function ExerciseModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div
         className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
-      {/* Modal Dialog */}
       <div className="relative z-10 w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-4 text-slate-100 max-h-[90vh] overflow-y-auto">
         <div className="flex items-start justify-between border-b border-slate-800 pb-3">
           <div>
