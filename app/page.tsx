@@ -288,7 +288,7 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* LESSON MODAL */}
+      {/* INTERACTIVE LESSON & EXERCISE MODAL */}
       <LessonModal
         lesson={selectedLesson}
         isOpen={isModalOpen}
