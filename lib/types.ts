@@ -1,15 +1,17 @@
+// lib/types.ts
+
 export interface Lesson {
   id?: string;
   title: string;
-  description?: string;
   duration?: string;
   content?: string;
+  type?: string;
 }
 
 export interface Module {
   id?: string;
   title: string;
-  description?: string;
+  description?: string; // Optional description field
   lessons: Lesson[];
 }
 
@@ -17,7 +19,7 @@ export interface SkillPathResponse {
   id?: string;
   topic: string;
   difficulty?: string;
-  summary?: string;
+  description?: string; // Optional description field
   modules: Module[];
 }
 
