@@ -1,8 +1,7 @@
-// lib/types.ts
-
 export interface Lesson {
   id?: string;
   title: string;
+  description?: string; // Added optional description
   duration?: string;
   content?: string;
   type?: string;
@@ -11,7 +10,7 @@ export interface Lesson {
 export interface Module {
   id?: string;
   title: string;
-  description?: string; // Optional description field
+  description?: string; // Added optional description
   lessons: Lesson[];
 }
 
@@ -19,23 +18,17 @@ export interface SkillPathResponse {
   id?: string;
   topic: string;
   difficulty?: string;
-  description?: string; // Optional description field
+  description?: string; // Added optional description
   modules: Module[];
 }
 
-export interface LessonContentResponse {
-  title: string;
-  content: string;
-  key_takeaways?: string[];
-}
-
 export interface ExerciseResponse {
-  title: string;
-  instructions: string;
+  id?: string;
+  title?: string;
+  instructions?: string;
   question?: string;
-  starter_code?: string;
   initial_code?: string;
-  options?: string[];
+  starter_code?: string;
   solution?: string;
 }
 

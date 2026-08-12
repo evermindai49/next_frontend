@@ -3,15 +3,13 @@
 import React from "react";
 import type { ExerciseResponse, Lesson } from "@/lib/types";
 
-// 1. UPDATE: Add 'lesson' to the interface as an optional prop
 export interface ExerciseModalProps {
   exercise?: ExerciseResponse | null;
-  lesson?: Lesson | null; // <-- Added this line
+  lesson?: Lesson | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
-// 2. UPDATE: Destructure 'lesson' here
 export default function ExerciseModal({
   exercise,
   lesson,
@@ -20,12 +18,14 @@ export default function ExerciseModal({
 }: ExerciseModalProps) {
   if (!isOpen) return null;
 
-  // 3. UPDATE: Fallback logic using both exercise AND lesson data
   const title = exercise?.title || lesson?.title || "Exercise Details";
+
+  // Safely access description on lesson if present
   const instructions =
     exercise?.instructions ||
-    lesson?.description || // Assuming Lesson has a description field
+    lesson?.description ||
     "Complete the exercise instructions below.";
+
   const initialCode = exercise?.initial_code || exercise?.starter_code;
 
   return (
@@ -36,7 +36,7 @@ export default function ExerciseModal({
         onClick={onClose}
       />
 
-      {/* Modal Dialog */}
+      {/* Modal Content */}
       <div className="relative z-10 w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-4 text-slate-100 max-h-[90vh] overflow-y-auto">
         <div className="flex items-start justify-between border-b border-slate-800 pb-3">
           <div>
@@ -54,7 +54,6 @@ export default function ExerciseModal({
         </div>
 
         <div className="space-y-4 text-sm">
-          {/* Instructions section handling both scenarios */}
           <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 space-y-2">
             <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-400">
               Description / Instructions
@@ -69,7 +68,6 @@ export default function ExerciseModal({
             )}
           </div>
 
-          {/* Code Section (Only shown if exercise data exists) */}
           {initialCode && (
             <div className="space-y-1">
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
@@ -81,7 +79,6 @@ export default function ExerciseModal({
             </div>
           )}
 
-          {/* Solution Section (Only shown if exercise data exists) */}
           {exercise?.solution && (
             <div className="space-y-1">
               <label className="block text-xs font-semibold uppercase tracking-wider text-emerald-400">
