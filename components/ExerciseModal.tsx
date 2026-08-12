@@ -3,7 +3,7 @@
 import React from "react";
 import type { ExerciseResponse, Lesson } from "@/lib/types";
 
-interface ExerciseModalProps {
+export interface ExerciseModalProps {
   exercise?: ExerciseResponse | null;
   lesson?: Lesson | null;
   isOpen: boolean;
@@ -18,7 +18,6 @@ export default function ExerciseModal({
 }: ExerciseModalProps) {
   if (!isOpen) return null;
 
-  // Resolve content whether passed as exercise or lesson
   const title = exercise?.title || lesson?.title || "Exercise Details";
   const instructions =
     exercise?.instructions ||
