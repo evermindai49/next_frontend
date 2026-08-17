@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import React, { useState, use } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import AmbientBackground from "@/components/AmbientBackground";
 import {
@@ -10,21 +10,24 @@ import {
   Code2,
   CheckCircle2,
   XCircle,
-  Play,
   RotateCcw,
   Sparkles,
   HelpCircle,
   Send,
 } from "lucide-react";
 
-export default function LessonPage() {
-  const params = useParams();
+export default function LessonPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const resolvedParams = use(params);
   const router = useRouter();
 
   // Active view toggle: 'content' or 'exercise'
   const [activeTab, setActiveTab] = useState<"content" | "exercise">("content");
 
-  // Exercise State
+  // Code Workspace State
   const [userCode, setUserCode] = useState<string>(
     `# Practice Task: Implement a basic LoRA Linear layer wrapper
 import torch
@@ -62,7 +65,7 @@ class LoRALinear(nn.Module):
     setIsGrading(true);
     setGradeResult(null);
 
-    // Simulated local evaluation pipeline
+    // Simulated evaluation pipeline
     setTimeout(() => {
       setIsGrading(false);
 
@@ -139,7 +142,7 @@ class LoRALinear(nn.Module):
               <header className="border-b border-slate-700 pb-6 space-y-3">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950 border border-indigo-500/50 text-indigo-300 text-xs font-bold">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Module 1 • Deep Dive</span>
+                  <span>Module 1 • Lesson ID: {resolvedParams.id}</span>
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-white">
                   Parameter-Efficient Fine-Tuning (PEFT) & Low-Rank Adaptation
@@ -155,23 +158,29 @@ class LoRALinear(nn.Module):
                   1. Mathematical Foundations
                 </h2>
                 <p className="leading-relaxed">
-                  Traditional fine-tuning updates all weights $W_0 \in \mathbb{R}^{d \times k}$ in a pre-trained model. During backpropagation, computing and storing gradients for billions of parameters creates high memory overhead during optimizer state tracking.
+                  Traditional fine-tuning updates all weights{" "}
+                  <code className="text-indigo-300 font-mono">W_0 ∈ ℝ^(d×k)</code>{" "}
+                  in a pre-trained model. During backpropagation, computing and storing gradients
+                  for billions of parameters creates high memory overhead during optimizer state tracking.
                 </p>
                 <p className="leading-relaxed">
-                  LoRA decomposes the weight update matrix $\Delta W$ into two low-rank matrices $A$ and $B$:
+                  LoRA decomposes the weight update matrix{" "}
+                  <code className="text-indigo-300 font-mono">ΔW</code> into two low-rank
+                  matrices <code className="text-indigo-300 font-mono">A</code> and{" "}
+                  <code className="text-indigo-300 font-mono">B</code>:
                 </p>
                 <div className="bg-[#0f172a] border border-slate-700 p-4 rounded-xl font-mono text-indigo-300 text-center text-sm sm:text-base">
-                  W = W_0 + \Delta W = W_0 + \frac{\alpha}{r} (B \cdot A)
+                  W = W_0 + ΔW = W_0 + (α / r) * (B · A)
                 </div>
                 <ul className="list-disc list-inside space-y-2 text-slate-300 pl-2">
                   <li>
-                    <strong className="text-white">Rank ($r$):</strong> Lower bound rank constraint (typically $r \in \{4, 8, 16\}$).
+                    <strong className="text-white">Rank (r):</strong> Lower bound rank constraint (typically r ∈ {"{4, 8, 16}"}).
                   </li>
                   <li>
-                    <strong className="text-white">Scaling ($\alpha$):</strong> Constant scaling hyperparameter that stabilizes updates when modifying $r$.
+                    <strong className="text-white">Scaling (α):</strong> Constant scaling hyperparameter that stabilizes updates when modifying r.
                   </li>
                   <li>
-                    <strong className="text-white">Initialization:</strong> Matrix $A$ uses Gaussian initialization ($\mathcal{N}(0, \sigma^2)$), while Matrix $B$ is initialized to zero so $\Delta W = 0$ at step 0.
+                    <strong className="text-white">Initialization:</strong> Matrix A uses Gaussian initialization N(0, σ²), while Matrix B is initialized to zero so ΔW = 0 at step 0.
                   </li>
                 </ul>
               </section>
@@ -182,7 +191,7 @@ class LoRALinear(nn.Module):
                   2. Architectural Integration & Memory Footprint
                 </h2>
                 <p className="leading-relaxed">
-                  During inference, the adapter weights can be merged directly into the base weights ($W = W_0 + \frac{\alpha}{r} BA$), introducing zero added latency compared to prompt-tuning or prefix-tuning approaches.
+                  During inference, the adapter weights can be merged directly into the base weights, introducing zero added latency compared to prompt-tuning or prefix-tuning approaches.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                   <div className="bg-[#0f172a] border border-slate-700 p-5 rounded-xl space-y-2">
@@ -198,7 +207,7 @@ class LoRALinear(nn.Module):
                       LoRA Adaptation
                     </h3>
                     <p className="text-xs text-slate-300">
-                      Freezes base model $W_0$. Trains only ~4M adapter parameters, reducing VRAM footprint under 16GB.
+                      Freezes base model W_0. Trains only ~4M adapter parameters, reducing VRAM footprint under 16GB.
                     </p>
                   </div>
                 </div>
@@ -228,7 +237,7 @@ class LoRALinear(nn.Module):
                   <span>Part 1: Conceptual Verification</span>
                 </div>
                 <h3 className="text-lg font-bold text-white">
-                  Why is Matrix $B$ initialized to zero during LoRA setup?
+                  Why is Matrix B initialized to zero during LoRA setup?
                 </h3>
 
                 <div className="grid gap-3 pt-2">
