@@ -14,6 +14,7 @@ import {
   Sparkles,
   HelpCircle,
   Send,
+  ExternalLink,
 } from "lucide-react";
 
 export default function LessonPage({
@@ -60,6 +61,12 @@ class LoRALinear(nn.Module):
     passed: boolean;
     feedback: string;
   } | null>(null);
+
+  // Router handler for navigating directly to full workspace
+  const handleOpenFullWorkspace = () => {
+    const lessonId = encodeURIComponent(resolvedParams.id);
+    router.push(`/lesson/${lessonId}`);
+  };
 
   const handleGradeSubmission = () => {
     setIsGrading(true);
@@ -213,18 +220,29 @@ class LoRALinear(nn.Module):
                 </div>
               </section>
 
-              {/* Bottom Action CTA */}
-              <div className="pt-6 border-t border-slate-700 flex justify-between items-center">
+              {/* Bottom Action CTA Bar */}
+              <div className="pt-6 border-t border-slate-700 flex flex-wrap gap-4 justify-between items-center">
                 <span className="text-xs text-slate-400 font-medium">
-                  Ready to test your knowledge?
+                  Ready to test your knowledge or open the full workspace?
                 </span>
-                <button
-                  onClick={() => setActiveTab("exercise")}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-xl transition flex items-center gap-2 shadow-lg"
-                >
-                  <span>Proceed to Practical Lab</span>
-                  <Code2 className="w-4 h-4" />
-                </button>
+                
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleOpenFullWorkspace}
+                    className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-5 py-3 rounded-xl transition flex items-center gap-2 border border-slate-600 text-xs sm:text-sm"
+                  >
+                    <span>Open Full Workspace</span>
+                    <ExternalLink className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    onClick={() => setActiveTab("exercise")}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-xl transition flex items-center gap-2 shadow-lg text-xs sm:text-sm"
+                  >
+                    <span>Proceed to Practical Lab</span>
+                    <Code2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </article>
           ) : (
