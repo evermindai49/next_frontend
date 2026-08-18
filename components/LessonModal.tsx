@@ -19,7 +19,7 @@ interface FeedbackState {
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
-  "https://vigilant-amazement-production-02e7.up.railway.app";
+  "https://my-fastapi-backend-iota.vercel.app";
 
 export default function LessonModal({
   lesson,
