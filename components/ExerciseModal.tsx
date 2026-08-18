@@ -1,300 +1,231 @@
-"use client";
+import React, { useState, useEffect } from 'react';
 
-import React, { useState, useEffect } from "react";
-import type { ExerciseResponse, Lesson } from "@/lib/types";
-
-export interface ExerciseModalProps {
-  exercise?: ExerciseResponse | null;
-  lesson?: Lesson | null;
-  isOpen: boolean;
-  onClose: () => void;
+// ------------------------------------------------------------------------------
+// TypeScript Interfaces
+// ------------------------------------------------------------------------------
+export interface Exercise {
+  id?: string;
+  title: string;
+  instructions?: string;
+  initial_code: string;
+  hints?: string[];
+  options?: string[];
+  solution?: string;
 }
 
-interface FeedbackState {
-  is_correct: bool;
+export interface FeedbackResponse {
+  is_correct: boolean;
   score: number;
   feedback: string;
   suggestions?: string[];
 }
 
-const BASE_URL = (
-  process.env.NEXT_PUBLIC_API_URL ||
-  "https://my-fastapi-backend-iota.vercel.app"
-).replace(/\/$/, "");
+export interface ExerciseModalProps {
+  isOpen: boolean; // ✅ Fixed TS2304 error: changed `bool` to `boolean`
+  exercise: Exercise | null;
+  onClose: () => void;
+  onSuccess?: (score: number) => void;
+  isCompleted?: boolean; // ✅ Fixed TS2304 error
+}
 
-export default function ExerciseModal({
-  exercise,
-  lesson,
+// ------------------------------------------------------------------------------
+// Component Implementation
+// ------------------------------------------------------------------------------
+export const ExerciseModal: React.FC<ExerciseModalProps> = ({
   isOpen,
+  exercise,
   onClose,
-}: ExerciseModalProps) {
-  const [userCode, setUserCode] = useState<string>("");
-  const [showSolution, setShowSolution] = useState<boolean>(false);
+  onSuccess,
+  isCompleted = false,
+}) => {
+  const [userCode, setUserCode] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [evaluation, setEvaluation] = useState<FeedbackState | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [feedback, setFeedback] = useState<FeedbackResponse | null>(null);
+  const [activeHintIndex, setActiveHintIndex] = useState<number>(0);
+  const [showHint, setShowHint] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Sync state whenever the selected exercise or modal visibility changes
   useEffect(() => {
     if (exercise) {
-      const starter =
-        exercise.initial_code ||
-        exercise.starter_code ||
-        "# Write your solution here...\n";
-      setUserCode(starter);
-      setEvaluation(null);
-      setErrorMessage("");
-      setShowSolution(false);
+      setUserCode(exercise.initial_code || '');
+      setFeedback(null);
+      setErrorMessage(null);
+      setShowHint(false);
+      setActiveHintIndex(0);
     }
-  }, [exercise]);
+  }, [exercise, isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !exercise) return null;
 
-  const title =
-    exercise?.title ||
-    exercise?.question ||
-    lesson?.title ||
-    "Exercise Checklist";
-
-  const instructions =
-    exercise?.instructions ||
-    exercise?.description ||
-    lesson?.description ||
-    "Complete the exercise instructions below.";
-
-  const initialCode =
-    exercise?.initial_code ||
-    exercise?.starter_code ||
-    "# Write your solution here...\n";
-
-  const handleSubmitCode = async () => {
-    if (!userCode.trim()) {
-      setErrorMessage("Please enter some code before submitting.");
-      return;
-    }
-
+  const handleSubmit = async () => {
     setIsSubmitting(true);
-    setErrorMessage("");
-    setEvaluation(null);
-
-    const titleToSubmit = exercise?.title || exercise?.question || lesson?.title || "Exercise Check";
+    setErrorMessage(null);
+    setFeedback(null);
 
     try {
-      const endpoint = `${BASE_URL}/api/v1/submit-answer`;
-      console.log("Submitting to pipeline endpoint:", endpoint);
-
-      const response = await fetch(endpoint, {
-        method: "POST",
+      const response = await fetch('/api/v1/submit-answer', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          exercise_title: titleToSubmit,
+          exercise_title: exercise.title,
           user_code: userCode,
         }),
       });
 
       if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(
-          errData.detail || `Server error (${response.status}): Evaluation service unavailable.`
-        );
+        throw new Error(`Evaluation request failed with status: ${response.status}`);
       }
 
-      const feedbackData: FeedbackState = await response.json();
-      setEvaluation(feedbackData);
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : "Failed to connect to the evaluation engine. Please try again.";
-      console.error("Submission evaluation error:", err);
-      setErrorMessage(message);
+      const result: FeedbackResponse = await response.json();
+      setFeedback(result);
+
+      if (result.is_correct && onSuccess) {
+        onSuccess(result.score);
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'An unexpected error occurred during evaluation.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity"
-        onClick={onClose}
-      />
+  const handleNextHint = () => {
+    if (exercise.hints && activeHintIndex < exercise.hints.length - 1) {
+      setActiveHintIndex((prev) => prev + 1);
+    }
+  };
 
-      {/* Main Container */}
-      <div
-        className="relative z-10 w-full max-w-2xl rounded-2xl border-2 border-slate-600 bg-[#1e293b] p-6 shadow-2xl space-y-5 text-white max-h-[90vh] overflow-y-auto"
-        style={{ backgroundColor: "#1e293b", color: "#ffffff", opacity: 1 }}
-      >
-        <div className="flex items-start justify-between border-b border-slate-700 pb-4">
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="relative w-full max-w-3xl rounded-xl border border-gray-700 bg-gray-900 p-6 text-gray-100 shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-gray-800 pb-4">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
-              {exercise ? "Submission Evaluation Pipeline" : "Lesson Preview"}
-            </span>
-            <h3 className="text-xl font-bold text-white mt-1">{title}</h3>
+            <h2 className="text-xl font-bold text-white">{exercise.title}</h2>
+            {isCompleted && (
+              <span className="mt-1 inline-block rounded-full bg-green-900/50 px-2.5 py-0.5 text-xs font-semibold text-green-400 border border-green-700">
+                Completed
+              </span>
+            )}
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-slate-300 hover:bg-slate-700 hover:text-white transition"
+            className="rounded-lg p-2 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+            aria-label="Close Modal"
           >
             ✕
           </button>
         </div>
 
-        <div className="space-y-4 text-sm">
-          {/* Instructions Card */}
-          <div
-            className="rounded-xl border border-slate-700 bg-[#0f172a] p-5 space-y-3"
-            style={{ backgroundColor: "#0f172a", color: "#f8fafc", opacity: 1 }}
-          >
-            <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-300">
-              Instructions
-            </h4>
-            <p className="text-slate-100 text-sm leading-relaxed">
-              {instructions}
-            </p>
-
-            {exercise?.question && (
-              <div className="mt-3 pt-3 border-t border-slate-700 text-slate-200 text-xs">
-                <span className="font-semibold text-white">Question: </span>
-                {exercise.question}
-              </div>
-            )}
+        {/* Instructions */}
+        {exercise.instructions && (
+          <div className="my-4 rounded-lg bg-gray-800/60 p-3 text-sm text-gray-300 border border-gray-700/50">
+            <p className="font-medium text-gray-200">Instructions:</p>
+            <p className="mt-1">{exercise.instructions}</p>
           </div>
+        )}
 
-          {/* Interactive Code Editor */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
-                Your Python Solution
-              </label>
-              <button
-                type="button"
-                onClick={() => setUserCode(initialCode)}
-                className="text-[11px] text-slate-400 hover:text-indigo-300 underline"
-              >
-                Reset Code
-              </button>
-            </div>
-            <textarea
-              rows={8}
-              value={userCode}
-              onChange={(e) => setUserCode(e.target.value)}
-              placeholder="# Write your code solution here..."
-              className="w-full rounded-xl border border-slate-700 bg-[#0f172a] p-4 font-mono text-xs text-emerald-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              style={{ backgroundColor: "#0f172a" }}
-            />
-          </div>
-
-          {/* Hints */}
-          {exercise?.hints && exercise.hints.length > 0 && (
-            <div className="text-xs text-amber-300/90 space-y-1 bg-amber-950/20 p-3 rounded-lg border border-amber-900/30">
-              <span className="font-bold">💡 Hint:</span>
-              <ul className="list-disc pl-4 space-y-0.5 text-amber-200/80">
-                {exercise.hints.map((hint: string, hIdx: number) => (
-                  <li key={hIdx}>{hint}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Actions & Triggers */}
-          <div className="flex items-center justify-between pt-1">
-            <button
-              type="button"
-              disabled={isSubmitting}
-              onClick={handleSubmitCode}
-              className="rounded-lg bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-indigo-500 disabled:opacity-50 flex items-center space-x-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="animate-spin text-sm">🌀</span>
-                  <span>Running Unit Tests...</span>
-                </>
-              ) : (
-                <span>Submit Answer</span>
-              )}
-            </button>
-
-            {exercise?.solution && (
-              <button
-                type="button"
-                onClick={() => setShowSolution(!showSolution)}
-                className="text-xs font-semibold text-slate-400 hover:text-indigo-300 transition"
-              >
-                {showSolution ? "Hide Model Solution" : "Reveal Model Solution"}
-              </button>
-            )}
-          </div>
-
-          {/* Error Banner */}
-          {errorMessage && (
-            <div className="rounded-lg border border-red-800/50 bg-red-950/30 p-3 text-xs text-red-300">
-              ⚠️ {errorMessage}
-            </div>
-          )}
-
-          {/* Evaluation Results Output */}
-          {evaluation && (
-            <div
-              className={`rounded-xl border p-4 space-y-2 text-xs ${
-                evaluation.is_correct
-                  ? "border-emerald-700/50 bg-emerald-950/30 text-emerald-200"
-                  : "border-amber-700/50 bg-amber-950/30 text-amber-200"
-              }`}
-            >
-              <div className="flex items-center justify-between font-bold">
-                <span>
-                  {evaluation.is_correct ? "✅ Passed Automated Verification" : "❌ Execution Error"}
-                </span>
-                <span className="rounded bg-slate-800 px-2.5 py-1 text-white">
-                  Score: {evaluation.score}/100
-                </span>
-              </div>
-              <p className="leading-relaxed">{evaluation.feedback}</p>
-
-              {evaluation.suggestions && evaluation.suggestions.length > 0 && (
-                <div className="pt-2 border-t border-slate-700/50">
-                  <span className="font-semibold block mb-1">
-                    Suggestions:
-                  </span>
-                  <ul className="list-disc pl-4 space-y-0.5">
-                    {evaluation.suggestions.map((sug: string, sIdx: number) => (
-                      <li key={sIdx}>{sug}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Model Solution */}
-          {showSolution && exercise?.solution && (
-            <div className="space-y-1 pt-2">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-emerald-400">
-                Model Solution
-              </label>
-              <pre
-                className="rounded-xl border border-emerald-500/40 bg-[#062016] p-4 font-mono text-xs text-emerald-200 overflow-x-auto"
-                style={{ backgroundColor: "#062016" }}
-              >
-                <code>{exercise.solution}</code>
-              </pre>
-            </div>
-          )}
+        {/* Code Editor Input */}
+        <div className="my-4">
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">
+            Python Solution Editor
+          </label>
+          <textarea
+            value={userCode}
+            onChange={(e) => setUserCode(e.target.value)}
+            rows={8}
+            className="w-full rounded-lg border border-gray-700 bg-gray-950 p-3 font-mono text-sm text-green-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="# Write your Python solution here..."
+          />
         </div>
 
-        <div className="flex justify-end border-t border-slate-700 pt-4">
-          <button
-            onClick={onClose}
-            className="rounded-xl bg-slate-700 px-6 py-2.5 text-xs font-bold text-white transition hover:bg-slate-600"
+        {/* Hints Section */}
+        {exercise.hints && exercise.hints.length > 0 && (
+          <div className="my-3">
+            {!showHint ? (
+              <button
+                type="button"
+                onClick={() => setShowHint(true)}
+                className="text-xs text-blue-400 underline hover:text-blue-300"
+              >
+                Need a hint?
+              </button>
+            ) : (
+              <div className="rounded-lg border border-amber-500/30 bg-amber-950/20 p-3 text-xs text-amber-200">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold">
+                    Hint {activeHintIndex + 1} of {exercise.hints.length}:
+                  </span>
+                  {activeHintIndex < exercise.hints.length - 1 && (
+                    <button
+                      onClick={handleNextHint}
+                      className="text-blue-400 hover:underline"
+                    >
+                      Next Hint →
+                    </button>
+                  )}
+                </div>
+                <p className="mt-1">{exercise.hints[activeHintIndex]}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Error Output */}
+        {errorMessage && (
+          <div className="my-3 rounded-lg border border-red-500/50 bg-red-950/30 p-3 text-xs text-red-300">
+            {errorMessage}
+          </div>
+        )}
+
+        {/* Feedback Evaluation Display */}
+        {feedback && (
+          <div
+            className={`my-4 rounded-lg border p-4 text-sm ${
+              feedback.is_correct
+                ? 'border-green-500/40 bg-green-950/30 text-green-200'
+                : 'border-red-500/40 bg-red-950/30 text-red-200'
+            }`}
           >
-            Close
+            <div className="flex items-center justify-between font-bold">
+              <span>{feedback.is_correct ? ' Correct!' : ' Needs Revision'}</span>
+              <span className="text-xs">Score: {feedback.score}/100</span>
+            </div>
+            <p className="mt-2 text-xs leading-relaxed">{feedback.feedback}</p>
+            {feedback.suggestions && feedback.suggestions.length > 0 && (
+              <ul className="mt-2 list-disc pl-4 text-xs space-y-1">
+                {feedback.suggestions.map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="mt-6 flex items-center justify-end space-x-3 border-t border-gray-800 pt-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-xs font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-semibold text-white hover:bg-blue-500 disabled:opacity-50 transition-colors"
+          >
+            {isSubmitting ? 'Evaluating...' : 'Submit Answer'}
           </button>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default ExerciseModal;
