@@ -1,9 +1,20 @@
-=import {
+// ./lib/api.ts
+
+// 1. CRITICAL FIX: Use 'import type' for type-only imports so SWC ignores them during JS transpilation
+import type {
   SkillPathResponse,
   LessonContentResponse,
   ExerciseResponse,
   FeedbackResponse,
 } from "./types";
+
+// Re-export type definitions cleanly so consumers can safely import types directly from api.ts
+export type {
+  SkillPathResponse,
+  LessonContentResponse,
+  ExerciseResponse,
+  FeedbackResponse,
+};
 
 // Ensure no trailing slash on the base URL to prevent doubled slashes in requests
 const API_BASE_URL = (
@@ -11,7 +22,7 @@ const API_BASE_URL = (
 ).replace(/\/$/, "");
 
 /**
-  Generic wrapper for API requests with standardized headers & error handling.
+ * Generic wrapper for API requests with standardized headers & error handling.
  */
 async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
@@ -26,15 +37,16 @@ async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    
+
     // Extract FastAPI detailed error message if present
     let errorMessage = `Request failed with status ${response.status}`;
     if (errorData.detail) {
-      errorMessage = typeof errorData.detail === "string" 
-        ? errorData.detail 
-        : JSON.stringify(errorData.detail);
+      errorMessage =
+        typeof errorData.detail === "string"
+          ? errorData.detail
+          : JSON.stringify(errorData.detail);
     }
-    
+
     throw new Error(errorMessage);
   }
 
@@ -44,7 +56,7 @@ async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise
 // --- Direct Named Exports ---
 
 /**
-  Retrieves a full skill path curriculum by topic, difficulty, and learning goals.
+ * Retrieves a full skill path curriculum by topic, difficulty, and learning goals.
  */
 export async function generateSkillPath(
   topic: string,
@@ -58,7 +70,7 @@ export async function generateSkillPath(
 }
 
 /**
-  Generates on-demand content for a specific lesson title or topic.
+ * Generates on-demand content for a specific lesson title or topic.
  */
 export async function generateLessonContent(
   topic: string,
@@ -67,25 +79,28 @@ export async function generateLessonContent(
 ): Promise<LessonContentResponse> {
   return fetchAPI<LessonContentResponse>("/api/v1/generate-lesson", {
     method: "POST",
-    body: JSON.stringify({ 
-      topic, 
-      module_title: moduleTitle, 
-      course_name: courseName 
+    body: JSON.stringify({
+      topic,
+      module_title: moduleTitle,
+      course_name: courseName,
     }),
   });
 }
 
 /**
-  Retrieves lesson details and exercises directly by lesson ID.
+ * Retrieves lesson details and exercises directly by lesson ID.
  */
 export async function getLessonById(lessonId: string): Promise<LessonContentResponse> {
-  return fetchAPI<LessonContentResponse>(`/api/v1/lesson/${encodeURIComponent(lessonId)}`, {
-    method: "GET",
-  });
+  return fetchAPI<LessonContentResponse>(
+    `/api/v1/lesson/${encodeURIComponent(lessonId)}`,
+    {
+      method: "GET",
+    }
+  );
 }
 
 /**
-  Generates a standalone coding exercise for a given topic.
+ * Generates a standalone coding exercise for a given topic.
  */
 export async function generateExercise(topic: string): Promise<ExerciseResponse> {
   return fetchAPI<ExerciseResponse>("/api/v1/generate-exercise", {
@@ -95,7 +110,7 @@ export async function generateExercise(topic: string): Promise<ExerciseResponse>
 }
 
 /**
-  Submits student code for automated evaluation and feedback.
+ * Submits student code for automated evaluation and feedback.
  */
 export async function submitAnswer(
   exerciseTitle: string,
@@ -103,9 +118,9 @@ export async function submitAnswer(
 ): Promise<FeedbackResponse> {
   return fetchAPI<FeedbackResponse>("/api/v1/submit-answer", {
     method: "POST",
-    body: JSON.stringify({ 
-      exercise_title: exerciseTitle, 
-      user_code: userCode 
+    body: JSON.stringify({
+      exercise_title: exerciseTitle,
+      user_code: userCode,
     }),
   });
 }
