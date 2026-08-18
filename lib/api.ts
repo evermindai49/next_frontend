@@ -1,15 +1,22 @@
-import {
+=import {
   SkillPathResponse,
   LessonContentResponse,
   ExerciseResponse,
   FeedbackResponse,
 } from "./types";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://my-fastapi-backend-iota.vercel.app";
+// Ensure no trailing slash on the base URL to prevent doubled slashes in requests
+const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_API_URL || "https://my-fastapi-backend-iota.vercel.app"
+).replace(/\/$/, "");
 
+/**
+  Generic wrapper for API requests with standardized headers & error handling.
+ */
 async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const url = `${API_BASE_URL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
+
+  const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
@@ -19,13 +26,26 @@ async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || `Request failed with status ${response.status}`);
+    
+    // Extract FastAPI detailed error message if present
+    let errorMessage = `Request failed with status ${response.status}`;
+    if (errorData.detail) {
+      errorMessage = typeof errorData.detail === "string" 
+        ? errorData.detail 
+        : JSON.stringify(errorData.detail);
+    }
+    
+    throw new Error(errorMessage);
   }
 
   return response.json();
 }
 
 // --- Direct Named Exports ---
+
+/**
+  Retrieves a full skill path curriculum by topic, difficulty, and learning goals.
+ */
 export async function generateSkillPath(
   topic: string,
   difficulty = "Beginner",
@@ -37,6 +57,9 @@ export async function generateSkillPath(
   });
 }
 
+/**
+  Generates on-demand content for a specific lesson title or topic.
+ */
 export async function generateLessonContent(
   topic: string,
   moduleTitle?: string,
@@ -44,10 +67,26 @@ export async function generateLessonContent(
 ): Promise<LessonContentResponse> {
   return fetchAPI<LessonContentResponse>("/api/v1/generate-lesson", {
     method: "POST",
-    body: JSON.stringify({ topic, module_title: moduleTitle, course_name: courseName }),
+    body: JSON.stringify({ 
+      topic, 
+      module_title: moduleTitle, 
+      course_name: courseName 
+    }),
   });
 }
 
+/**
+  Retrieves lesson details and exercises directly by lesson ID.
+ */
+export async function getLessonById(lessonId: string): Promise<LessonContentResponse> {
+  return fetchAPI<LessonContentResponse>(`/api/v1/lesson/${encodeURIComponent(lessonId)}`, {
+    method: "GET",
+  });
+}
+
+/**
+  Generates a standalone coding exercise for a given topic.
+ */
 export async function generateExercise(topic: string): Promise<ExerciseResponse> {
   return fetchAPI<ExerciseResponse>("/api/v1/generate-exercise", {
     method: "POST",
@@ -55,13 +94,19 @@ export async function generateExercise(topic: string): Promise<ExerciseResponse>
   });
 }
 
+/**
+  Submits student code for automated evaluation and feedback.
+ */
 export async function submitAnswer(
   exerciseTitle: string,
   userCode: string
 ): Promise<FeedbackResponse> {
   return fetchAPI<FeedbackResponse>("/api/v1/submit-answer", {
     method: "POST",
-    body: JSON.stringify({ exercise_title: exerciseTitle, user_code: userCode }),
+    body: JSON.stringify({ 
+      exercise_title: exerciseTitle, 
+      user_code: userCode 
+    }),
   });
 }
 
@@ -69,6 +114,9 @@ export async function submitAnswer(
 export const ApiService = {
   generateSkillPath,
   generateLessonContent,
+  getLessonById,
   generateExercise,
   submitAnswer,
 };
+
+export default ApiService;

@@ -17,6 +17,10 @@ interface FeedbackState {
   suggestions: string[];
 }
 
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://vigilant-amazement-production-02e7.up.railway.app";
+
 export default function LessonModal({
   lesson,
   isOpen,
@@ -29,12 +33,12 @@ export default function LessonModal({
   const [evaluations, setEvaluations] = useState<Record<number, FeedbackState>>({});
   const [errorMessages, setErrorMessages] = useState<Record<number, string>>({});
 
-  // Sync initial starter code when exercises load
   useEffect(() => {
     if (exercises.length > 0) {
       const initialCodes: Record<number, string> = {};
       exercises.forEach((ex, idx) => {
-        const starter = ex.initial_code || ex.starter_code || ex.code || "# Write your solution here\n";
+        const starter =
+          ex.initial_code || ex.starter_code || "# Write your solution here...\n";
         initialCodes[idx] = starter;
       });
       setUserCodes(initialCodes);
@@ -65,11 +69,11 @@ export default function LessonModal({
     const titleToSubmit = exercise.title || exercise.question || lesson.title;
 
     try {
-      const response = await fetch("/api/v1/submit-answer", {
+      const response = await fetch(`${BASE_URL}/api/v1/submit-answer`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify({
           exercise_title: titleToSubmit,
@@ -99,16 +103,16 @@ export default function LessonModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Dark Overlay Backdrop */}
+      {/* Dark Backdrop */}
       <div
         className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity"
         onClick={onClose}
       />
 
-      {/* Solid Opaque Main Container */}
+      {/* Main Dialog Container */}
       <div
         className="relative z-10 w-full max-w-3xl rounded-2xl border-2 border-slate-600 bg-[#1e293b] p-6 sm:p-8 shadow-2xl space-y-6 text-white max-h-[90vh] overflow-y-auto"
-        style={{ backgroundColor: "#1e293b", color: "#ffffff", opacity: 1 }}
+        style={{ backgroundColor: "#1e293b", color: "#ffffff" }}
       >
         <div className="flex items-start justify-between border-b border-slate-700 pb-4">
           <div>
@@ -125,7 +129,7 @@ export default function LessonModal({
           </button>
         </div>
 
-        {/* Lesson Description Container */}
+        {/* Lesson Description */}
         {lesson.description && (
           <div
             className="rounded-xl border border-slate-700 bg-[#0f172a] p-5 text-slate-100 text-sm leading-relaxed"
@@ -135,7 +139,17 @@ export default function LessonModal({
           </div>
         )}
 
-        {/* Exercises Section */}
+        {/* Lesson Content Body */}
+        {lesson.content && (
+          <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-5 text-slate-200 text-xs leading-relaxed space-y-2">
+            <h5 className="font-bold text-indigo-300 uppercase tracking-wide text-[10px]">
+              Lesson Notes
+            </h5>
+            <p className="whitespace-pre-line">{lesson.content}</p>
+          </div>
+        )}
+
+        {/* Exercises List */}
         {exercises.length > 0 && (
           <div className="space-y-6">
             <h4 className="text-lg font-bold text-white">Lesson Exercises</h4>
@@ -183,7 +197,7 @@ export default function LessonModal({
                     </div>
                   )}
 
-                  {/* Code Editor Area */}
+                  {/* Code Editor */}
                   <div className="space-y-2 pt-2">
                     <label className="text-xs font-semibold text-slate-400">
                       Your Code Solution:
@@ -192,7 +206,7 @@ export default function LessonModal({
                       rows={6}
                       value={userCodes[exIdx] || ""}
                       onChange={(e) => handleCodeChange(exIdx, e.target.value)}
-                      placeholder="# Type your solution here..."
+                      placeholder="# Write your python code solution here..."
                       className="w-full rounded-lg border border-slate-700 bg-[#1e293b] p-3 text-xs font-mono text-emerald-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                     />
                   </div>
@@ -209,7 +223,7 @@ export default function LessonModal({
                     </div>
                   )}
 
-                  {/* Submit Button */}
+                  {/* Actions */}
                   <div className="flex items-center justify-between pt-2">
                     <button
                       type="button"
@@ -217,7 +231,7 @@ export default function LessonModal({
                       onClick={() => handleSubmitCode(exIdx, ex)}
                       className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-indigo-500 disabled:opacity-50"
                     >
-                      {isSubmitting ? "Evaluating Code..." : "Submit & Grade Answer"}
+                      {isSubmitting ? "Evaluating Code..." : "Submit Answer"}
                     </button>
                   </div>
 
@@ -228,7 +242,7 @@ export default function LessonModal({
                     </div>
                   )}
 
-                  {/* Grading & Feedback Display */}
+                  {/* Evaluation Output */}
                   {feedback && (
                     <div
                       className={`rounded-xl border p-4 space-y-2 text-xs ${
@@ -238,9 +252,7 @@ export default function LessonModal({
                       }`}
                     >
                       <div className="flex items-center justify-between font-bold">
-                        <span>
-                          {feedback.is_correct ? "✅ Passed" : "❌ Needs Work"}
-                        </span>
+                        <span>{feedback.is_correct ? "✅ Passed" : "❌ Needs Work"}</span>
                         <span className="rounded bg-slate-800 px-2 py-1 text-white">
                           Score: {feedback.score}/100
                         </span>
