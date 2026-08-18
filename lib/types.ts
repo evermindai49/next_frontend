@@ -24,18 +24,23 @@ export interface SkillPathResponse {
 
 // lib/types.ts (or wherever ExerciseResponse is declared)
 
+// lib/types.ts
+
 export interface ExerciseResponse {
-  id?: string;
+  id?: string | number;
   title?: string;
   description?: string;
+  question?: string;
+  instructions?: string;
+  initial_code?: string;
   starter_code?: string;
-  solution_code?: string;
-  // Add the missing hints array field
+  solution?: string;
+  options?: string[];
   hints?: string[];
-  // Optional backend response fields
-  score?: number;
-  passed?: boolean;
-  feedback?: string;
+  test_cases?: Array<{
+    input?: string;
+    expected_output?: string;
+  }>;
 }
 
 // Added missing LessonContentResponse interface expected by lib/api.ts
