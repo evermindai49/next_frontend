@@ -11,7 +11,7 @@ export interface ExerciseModalProps {
 }
 
 interface FeedbackState {
-  is_correct: boolean;
+  is_correct: bool;
   score: number;
   feedback: string;
   suggestions?: string[];
@@ -67,15 +67,22 @@ export default function ExerciseModal({
     "# Write your solution here...\n";
 
   const handleSubmitCode = async () => {
-    if (!exercise) return;
+    if (!userCode.trim()) {
+      setErrorMessage("Please enter some code before submitting.");
+      return;
+    }
 
     setIsSubmitting(true);
     setErrorMessage("");
+    setEvaluation(null);
 
-    const titleToSubmit = exercise.title || exercise.question || "Exercise";
+    const titleToSubmit = exercise?.title || exercise?.question || lesson?.title || "Exercise Check";
 
     try {
-      const response = await fetch(`${BASE_URL}/api/v1/submit-answer`, {
+      const endpoint = `${BASE_URL}/api/v1/submit-answer`;
+      console.log("Submitting to pipeline endpoint:", endpoint);
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -90,7 +97,7 @@ export default function ExerciseModal({
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
         throw new Error(
-          errData.detail || `Server returned status ${response.status}`
+          errData.detail || `Server error (${response.status}): Evaluation service unavailable.`
         );
       }
 
@@ -100,7 +107,8 @@ export default function ExerciseModal({
       const message =
         err instanceof Error
           ? err.message
-          : "Failed to evaluate submission. Please try again.";
+          : "Failed to connect to the evaluation engine. Please try again.";
+      console.error("Submission evaluation error:", err);
       setErrorMessage(message);
     } finally {
       setIsSubmitting(false);
@@ -115,7 +123,7 @@ export default function ExerciseModal({
         onClick={onClose}
       />
 
-      {/* Solid Opaque Modal Box */}
+      {/* Main Container */}
       <div
         className="relative z-10 w-full max-w-2xl rounded-2xl border-2 border-slate-600 bg-[#1e293b] p-6 shadow-2xl space-y-5 text-white max-h-[90vh] overflow-y-auto"
         style={{ backgroundColor: "#1e293b", color: "#ffffff", opacity: 1 }}
@@ -123,7 +131,7 @@ export default function ExerciseModal({
         <div className="flex items-start justify-between border-b border-slate-700 pb-4">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
-              {exercise ? "Exercise Submission" : "Lesson Preview"}
+              {exercise ? "Submission Evaluation Pipeline" : "Lesson Preview"}
             </span>
             <h3 className="text-xl font-bold text-white mt-1">{title}</h3>
           </div>
@@ -142,7 +150,7 @@ export default function ExerciseModal({
             style={{ backgroundColor: "#0f172a", color: "#f8fafc", opacity: 1 }}
           >
             <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-300">
-              Description / Instructions
+              Instructions
             </h4>
             <p className="text-slate-100 text-sm leading-relaxed">
               {instructions}
@@ -171,16 +179,16 @@ export default function ExerciseModal({
               </button>
             </div>
             <textarea
-              rows={7}
+              rows={8}
               value={userCode}
               onChange={(e) => setUserCode(e.target.value)}
-              placeholder="# Write your python code solution here..."
+              placeholder="# Write your code solution here..."
               className="w-full rounded-xl border border-slate-700 bg-[#0f172a] p-4 font-mono text-xs text-emerald-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               style={{ backgroundColor: "#0f172a" }}
             />
           </div>
 
-          {/* Optional Hints */}
+          {/* Hints */}
           {exercise?.hints && exercise.hints.length > 0 && (
             <div className="text-xs text-amber-300/90 space-y-1 bg-amber-950/20 p-3 rounded-lg border border-amber-900/30">
               <span className="font-bold">💡 Hint:</span>
@@ -192,29 +200,34 @@ export default function ExerciseModal({
             </div>
           )}
 
-          {/* Submission Trigger */}
-          {exercise && (
-            <div className="flex items-center justify-between pt-1">
+          {/* Actions & Triggers */}
+          <div className="flex items-center justify-between pt-1">
+            <button
+              type="button"
+              disabled={isSubmitting}
+              onClick={handleSubmitCode}
+              className="rounded-lg bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-indigo-500 disabled:opacity-50 flex items-center space-x-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="animate-spin text-sm">🌀</span>
+                  <span>Running Unit Tests...</span>
+                </>
+              ) : (
+                <span>Submit Answer</span>
+              )}
+            </button>
+
+            {exercise?.solution && (
               <button
                 type="button"
-                disabled={isSubmitting}
-                onClick={handleSubmitCode}
-                className="rounded-lg bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-indigo-500 disabled:opacity-50"
+                onClick={() => setShowSolution(!showSolution)}
+                className="text-xs font-semibold text-slate-400 hover:text-indigo-300 transition"
               >
-                {isSubmitting ? "Evaluating Code..." : "Submit Answer"}
+                {showSolution ? "Hide Model Solution" : "Reveal Model Solution"}
               </button>
-
-              {exercise.solution && (
-                <button
-                  type="button"
-                  onClick={() => setShowSolution(!showSolution)}
-                  className="text-xs font-semibold text-slate-400 hover:text-indigo-300 transition"
-                >
-                  {showSolution ? "Hide Model Solution" : "Reveal Model Solution"}
-                </button>
-              )}
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Error Banner */}
           {errorMessage && (
@@ -223,7 +236,7 @@ export default function ExerciseModal({
             </div>
           )}
 
-          {/* Feedback & Score Display */}
+          {/* Evaluation Results Output */}
           {evaluation && (
             <div
               className={`rounded-xl border p-4 space-y-2 text-xs ${
@@ -234,7 +247,7 @@ export default function ExerciseModal({
             >
               <div className="flex items-center justify-between font-bold">
                 <span>
-                  {evaluation.is_correct ? "✅ Passed" : "❌ Needs Work"}
+                  {evaluation.is_correct ? "✅ Passed Automated Verification" : "❌ Execution Error"}
                 </span>
                 <span className="rounded bg-slate-800 px-2.5 py-1 text-white">
                   Score: {evaluation.score}/100
@@ -257,7 +270,7 @@ export default function ExerciseModal({
             </div>
           )}
 
-          {/* Model Solution (Collapsible) */}
+          {/* Model Solution */}
           {showSolution && exercise?.solution && (
             <div className="space-y-1 pt-2">
               <label className="block text-xs font-semibold uppercase tracking-wider text-emerald-400">
