@@ -14,12 +14,13 @@ interface FeedbackState {
   is_correct: boolean;
   score: number;
   feedback: string;
-  suggestions: string[];
+  suggestions?: string[];
 }
 
-const BASE_URL =
+const BASE_URL = (
   process.env.NEXT_PUBLIC_API_URL ||
-  "https://my-fastapi-backend-iota.vercel.app";
+  "https://my-fastapi-backend-iota.vercel.app"
+).replace(/\/$/, "");
 
 export default function LessonModal({
   lesson,
@@ -34,7 +35,7 @@ export default function LessonModal({
   const [errorMessages, setErrorMessages] = useState<Record<number, string>>({});
 
   useEffect(() => {
-    if (exercises.length > 0) {
+    if (exercises && exercises.length > 0) {
       const initialCodes: Record<number, string> = {};
       exercises.forEach((ex, idx) => {
         const starter =
@@ -61,11 +62,14 @@ export default function LessonModal({
     }));
   };
 
-  const handleSubmitCode = async (exerciseIdx: number, exercise: ExerciseResponse) => {
+  const handleSubmitCode = async (
+    exerciseIdx: number,
+    exercise: ExerciseResponse
+  ) => {
     setSubmittingIdx(exerciseIdx);
     setErrorMessages((prev) => ({ ...prev, [exerciseIdx]: "" }));
 
-    const codeToSubmit = userCodes[exerciseIdx] || exercise.initial_code || "";
+    const codeToSubmit = userCodes[exerciseIdx] || exercise.initial_code || exercise.starter_code || "";
     const titleToSubmit = exercise.title || exercise.question || lesson.title;
 
     try {
@@ -83,7 +87,9 @@ export default function LessonModal({
 
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || `Server returned status ${response.status}`);
+        throw new Error(
+          errData.detail || `Server returned status ${response.status}`
+        );
       }
 
       const feedbackData: FeedbackState = await response.json();
@@ -91,10 +97,14 @@ export default function LessonModal({
         ...prev,
         [exerciseIdx]: feedbackData,
       }));
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Failed to evaluate submission. Please try again.";
       setErrorMessages((prev) => ({
         ...prev,
-        [exerciseIdx]: err.message || "Failed to evaluate submission. Please try again.",
+        [exerciseIdx]: message,
       }));
     } finally {
       setSubmittingIdx(null);
@@ -170,7 +180,9 @@ export default function LessonModal({
                   </h5>
 
                   {ex.instructions && (
-                    <p className="text-xs text-slate-300 leading-relaxed">{ex.instructions}</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      {ex.instructions}
+                    </p>
                   )}
 
                   {/* Multiple Choice Options */}
@@ -190,7 +202,9 @@ export default function LessonModal({
                             }`}
                           >
                             <span>{opt}</span>
-                            {isSelected && <span className="text-white font-bold">✓</span>}
+                            {isSelected && (
+                              <span className="text-white font-bold">✓</span>
+                            )}
                           </button>
                         );
                       })}
@@ -216,7 +230,7 @@ export default function LessonModal({
                     <div className="text-xs text-amber-300/80 space-y-1 bg-amber-950/20 p-3 rounded-lg border border-amber-900/30">
                       <span className="font-bold">💡 Hint:</span>
                       <ul className="list-disc pl-4 space-y-0.5">
-                        {ex.hints.map((hint, hIdx) => (
+                        {ex.hints.map((hint: string, hIdx: number) => (
                           <li key={hIdx}>{hint}</li>
                         ))}
                       </ul>
@@ -252,7 +266,9 @@ export default function LessonModal({
                       }`}
                     >
                       <div className="flex items-center justify-between font-bold">
-                        <span>{feedback.is_correct ? "✅ Passed" : "❌ Needs Work"}</span>
+                        <span>
+                          {feedback.is_correct ? "✅ Passed" : "❌ Needs Work"}
+                        </span>
                         <span className="rounded bg-slate-800 px-2 py-1 text-white">
                           Score: {feedback.score}/100
                         </span>
@@ -261,9 +277,11 @@ export default function LessonModal({
 
                       {feedback.suggestions && feedback.suggestions.length > 0 && (
                         <div className="pt-2 border-t border-slate-700/50">
-                          <span className="font-semibold block mb-1">Suggestions:</span>
+                          <span className="font-semibold block mb-1">
+                            Suggestions:
+                          </span>
                           <ul className="list-disc pl-4 space-y-0.5">
-                            {feedback.suggestions.map((sug, sIdx) => (
+                            {feedback.suggestions.map((sug: string, sIdx: number) => (
                               <li key={sIdx}>{sug}</li>
                             ))}
                           </ul>
